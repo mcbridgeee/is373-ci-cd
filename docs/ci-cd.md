@@ -29,7 +29,7 @@ Record the published digest in the workflow summary. On rerun, reuse/verify the 
 
 Serialize release workflows with one production concurrency group; do not cancel an in-progress publication. Before promotion, verify the run still represents the current `main` head, so a stale rerun can't move `:prod` backward. PR runs can cancel superseded runs of themselves.
 
-Use the `DOCKER_API_KEY` Actions secret (a Docker Hub access token) to log in as `mcbridgeee`. Least-privilege permissions (`contents: read` unless a step needs more), pin third-party actions to a commit SHA, keep dependency versions reproducible (locked via `pyproject.toml`/lockfile).
+Use the `DOCKER_PAT` Actions secret (a Docker Hub access token) to log in as `mcbridgeee`. Least-privilege permissions (`contents: read` unless a step needs more), pin third-party actions to a commit SHA, keep dependency versions reproducible (locked via `pyproject.toml`/lockfile).
 
 ## Host-side deployment
 
