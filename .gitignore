@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# Playwright / test artifacts
+artifacts/
+test-results/
+
+# Local env and state
+.env
+.state/
+
+# OS
+.DS_Store
