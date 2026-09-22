@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Toothpaste Quiz</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    max-width: 640px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.5rem; }
+  fieldset {
+    border: 1px solid #8884;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+  }
+  legend { font-weight: 600; padding: 0 0.25rem; }
+  label { display: block; margin: 0.35rem 0; cursor: pointer; }
+  button {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+  }
+  button:disabled { background: #9ca3af; cursor: not-allowed; }
+  #result { margin-top: 1.5rem; padding: 1rem; border-radius: 8px; }
+  #result.agree { background: #dcfce7; }
+  #result.disagree { background: #fee2e2; }
+  #result.hidden { display: none; }
+  .warning { color: #b91c1c; font-weight: 600; }
+  footer { margin-top: 2rem; font-size: 0.8rem; color: #6b7280; }
+</style>
+</head>
+<body>
+  <h1>What toothpaste should you use?</h1>
+  <p>Answer four quick questions about your dental habits and find out.</p>
+
+  <form id="quiz-form">
+    <div id="questions"></div>
+    <button type="submit" id="submit-btn" disabled>See my recommendation</button>
+  </form>
+
+  <div id="result" class="hidden" role="status"></div>
+
+  <footer id="release-footer"></footer>
+
+<script>
+  const PRODUCT_MAP = { a: "Sensodyne", b: "Sensodyne", c: "Sensodyne", d: "Sensodyne" };
+
+  // Independently tallies the most-picked answer, then maps it to a product.
+  // The joke: every entry in PRODUCT_MAP points to the same place.
+  function computeClientResult(answers) {
+    const counts = {};
+    for (const answer of answers) counts[answer] = (counts[answer] || 0) + 1;
+    let winner = answers[0];
+    let max = -1;
+    for (const [key, count] of Object.entries(counts)) {
+      if (count > max) {
+        winner = key;
+        max = count;
+      }
+    }
+    return PRODUCT_MAP[winner];
+  }
+
+  function renderQuestions(questions) {
+    const container = document.getElementById("questions");
+    for (const question of questions) {
+      const fieldset = document.createElement("fieldset");
+      fieldset.dataset.questionId = question.id;
+
+      const legend = document.createElement("legend");
+      legend.textContent = question.prompt;
+      fieldset.appendChild(legend);
+
+      for (const [key, text] of Object.entries(question.choices)) {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = question.id;
+        input.value = key;
+        input.addEventListener("change", updateSubmitState);
+        label.appendChild(input);
+        label.append(" " + text);
+        fieldset.appendChild(label);
+      }
+      container.appendChild(fieldset);
+    }
+  }
+
+  function getSelectedAnswers(questions) {
+    return questions.map((q) => {
+      const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+      return checked ? checked.value : null;
+    });
+  }
+
+  function updateSubmitState() {
+    const answers = getSelectedAnswers(window.__questions);
+    document.getElementById("submit-btn").disabled = answers.some((a) => a === null);
+  }
+
+  async function loadQuestions() {
+    const response = await fetch("/api/questions");
+    const { questions } = await response.json();
+    window.__questions = questions;
+    renderQuestions(questions);
+  }
+
+  async function loadFooter() {
+    const response = await fetch("/health");
+    const health = await response.json();
+    document.getElementById("release-footer").textContent =
+      `commit ${health.commit} · built ${health.built_at}`;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const answers = getSelectedAnswers(window.__questions);
+    const client_result = computeClientResult(answers);
+
+    const response = await fetch("/api/quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answers, client_result }),
+    });
+    const body = await response.json();
+
+    const resultEl = document.getElementById("result");
+    resultEl.classList.remove("hidden", "agree", "disagree");
+    if (body.agree) {
+      resultEl.classList.add("agree");
+      resultEl.innerHTML = `<p>Your recommended toothpaste is <strong>${body.server_result}</strong>.</p>`;
+    } else {
+      resultEl.classList.add("disagree");
+      resultEl.innerHTML =
+        `<p class="warning">Client and server disagree — client said "${client_result}", server said "${body.server_result}". Not trusting either blindly.</p>`;
+    }
+  }
+
+  document.getElementById("quiz-form").addEventListener("submit", handleSubmit);
+  loadQuestions();
+  loadFooter();
+</script>
+</body>
+</html>
