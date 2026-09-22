@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible application, testing, or deployment failure.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+      description: Include the relevant requirement ID or specification link if known.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include inputs, commands, and the failing stage.
+    validations:
+      required: true
+  - type: input
+    id: release
+    attributes:
+      label: Environment and release
+      placeholder: "Development/production/CI, host architecture, commit or image digest"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Link workflow runs, traces, screenshots, or sanitized logs. Never paste tokens or credentials.
+  - type: textarea
+    id: verification
+    attributes:
+      label: Fix acceptance criteria
+      description: What regression check should pass after the fix?

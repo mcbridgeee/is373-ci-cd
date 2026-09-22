@@ -1,0 +1,40 @@
+name: Implementation task
+description: A focused change linked to the project specification.
+title: "[Task] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What behavior or capability will this change deliver?
+    validations:
+      required: true
+  - type: textarea
+    id: specification
+    attributes:
+      label: Specification and requirements
+      description: Link the relevant document sections and stable requirement IDs.
+      placeholder: "docs/spec.md — QUIZ-10, QUIZ-13"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable outcomes that must be true before this issue closes.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Tests, commands, or deployment evidence that will verify the outcomes.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Dependencies and scope limits
+      description: Link blocking issues and state anything intentionally deferred.

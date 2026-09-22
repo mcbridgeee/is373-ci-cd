@@ -1,0 +1,26 @@
+name: Specification decision
+description: Resolve an open question or propose a change to the specification.
+title: "[Decision] "
+labels: [question, documentation]
+body:
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision needed
+      description: Link the affected specification sections or requirements.
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options and recommendation
+      description: Explain the practical tradeoff and a proposed default.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Affected issues and acceptance criteria
+      description: Identify what depends on this decision and what needs to be updated afterward.
+    validations:
+      required: true
