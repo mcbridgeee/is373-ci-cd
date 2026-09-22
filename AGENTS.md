@@ -29,7 +29,7 @@ Build a minimal CI/CD teaching template: FastAPI, pytest, Playwright Python, and
 - Read existing work and preserve unrelated edits. Do not force-push, rewrite history, or hide failed demo commits.
 - Keep code, tests, and corresponding specification changes coherent. Avoid unrelated refactors and redundant tests that merely repeat the implementation.
 - Run checks appropriate to the change and record results honestly. A successful image push is not proof of deployment.
-- Never print secrets or commit credentials, `.env` files, browser artifacts, or private local configuration. Refer to `DOCKER_API_KEY` by name only.
+- Never print secrets or commit credentials, `.env` files, browser artifacts, or private local configuration. Refer to `DOCKER_PAT` by name only.
 - Do not enable branch protections until the intended required checks exist and have run; document proposed policy first.
 - Complete work already authorized by the user without adding redundant approval steps. This file does not require a separate approval for routine edits, commits, issues, or publishing already authorized in the conversation.
 

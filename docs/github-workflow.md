@@ -26,8 +26,8 @@ Not yet enabled. Plan (to activate once issue 6 has a first passing `verify` run
 
 ## Automation and credentials
 
-- Repository secret: `DOCKER_API_KEY` — a Docker Hub access token for `mcbridgeee`, scoped to push this one repository's image. Set once issue 6 needs it; never printed or committed.
-- Non-secret Docker Hub username: `mcbridgeee`.
+- Repository secret: `DOCKER_PAT` — a Docker Hub access token for `mcbridgeee`, scoped to push this one repository's image (Read & Write). Set on 2026-09-22 via the GitHub web UI, ahead of issue 6; confirmed present via `gh secret list` (name only), value never printed or committed.
+- Non-secret Docker Hub username: `mcbridgeee`. Docker Hub repo `mcbridgeee/is373-ci-cd` created manually as public on 2026-09-22.
 - Workflow permissions: start with `contents: read`.
 - Pull requests: verify only, no publishing credentials.
 - `main` pushes: verify, then publish the tested image.

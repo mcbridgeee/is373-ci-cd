@@ -16,6 +16,14 @@ Keeping arithmetic (`quiz.py`) separate from HTTP (`main.py`) separate from the 
 - **Ports**: development `8080`, production `8090`, WUD dashboard `8091`, matching the reference repo's convention so the two projects stay easy to compare.
 - **Image identity**: `mcbridgeee/is373-ci-cd` on Docker Hub, tagged `sha-<full-commit>` (immutable by convention) and `prod` (mutable, moved only after a tested image is confirmed).
 
+## Environment decisions (issue 2, recorded 2026-09-22)
+
+- **Host**: this machine — Docker Desktop via WSL2 (Ubuntu distro). Docker Desktop's WSL integration was already enabled for this distro; `docker ps` runs directly from this shell with no further setup.
+- **GitHub repo visibility**: `mcbridgeee/is373-ci-cd` stays **private** for now (deliberate choice, revisit later if needed). This means public-repo Actions minutes don't apply — usage counts against the account's private-repo Actions minutes.
+- **Docker Hub image visibility**: `mcbridgeee/is373-ci-cd` is **public** on Docker Hub, created manually (not auto-created via push) so it never defaulted to private. Confirmed via `GET https://hub.docker.com/v2/repositories/mcbridgeee/is373-ci-cd/` → `"is_private": false`. Because the image is public, WUD needs no pull credentials on the host even though the GitHub repo itself is private.
+- **Docker Hub username**: `mcbridgeee` (not a secret).
+- **Registry credential**: `DOCKER_PAT` — a Docker Hub personal access token (Read & Write scope), added as a GitHub Actions repository secret directly through the GitHub web UI (Settings → Secrets and variables → Actions), so the raw value never passed through any local shell, chat, or file. Confirmed present via `gh secret list` (name only).
+
 ## Docker Compose services
 
 - `dev` — builds from local source with a bind mount and reload, port `8080`. No published image required; this is what you run while iterating.
