@@ -53,7 +53,8 @@ services:
     environment:
       WUD_WATCHER_LOCAL_WATCHBYDEFAULT: "false"
       WUD_WATCHER_LOCAL_WATCHDIGESTDEFAULT: "true"
-      WUD_WATCHER_LOCAL_CRON: "* * * * *"
+      # Every 5 minutes: digest checks hit Docker Hub anonymously, which is rate limited per IP.
+      WUD_WATCHER_LOCAL_CRON: "*/5 * * * *"
       WUD_WATCHER_LOCAL_JITTER: "1000"
       WUD_TRIGGER_DOCKER_PRODUCTION_AUTO: "true"
       WUD_TRIGGER_DOCKER_PRODUCTION_PRUNE: "false"

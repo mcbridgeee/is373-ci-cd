@@ -45,7 +45,7 @@ Start with `make setup` and `make browsers` when running tests locally.
 | `make up` | Start dev, published prod, and WUD (local demonstration) |
 | `make deploy` | Start only published prod and WUD; no build, no dev (the droplet). Honors a rollback pause and the local override |
 | `make verify-production` | Check the running prod container's image ID and `/health` commit and environment against the selected release |
-| `make check-updates` | Ask WUD to check Docker Hub now instead of waiting for its one-minute poll |
+| `make check-updates` | Ask WUD to check Docker Hub now instead of waiting for its 5-minute poll |
 | `make status` | Show running services, update state, selected prod image, and prod `/health` |
 | `make down` | Stop this project's Compose services without deleting unrelated resources |
 | `make rollback RELEASE=<sha-full-commit or sha256:digest>` | Pause WUD, pin prod to a known-good release in `.state/release.env`, verify it |
