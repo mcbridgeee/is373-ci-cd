@@ -1,6 +1,6 @@
 # Implementation plan
 
-Status: documentation bootstrap (issue 1) in progress. Nothing else implemented yet.
+Status: #1–#4 done (docs, decisions, quiz logic, quiz page and tests). #5 (containers and command interface) in review. #6–#8 not started.
 
 Milestone: [v1 — Toothpaste quiz CI/CD demonstration](https://github.com/mcbridgeee/is373-ci-cd/milestone/1).
 
