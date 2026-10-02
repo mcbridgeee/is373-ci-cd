@@ -33,9 +33,9 @@ Use the `DOCKER_PAT` Actions secret (a Docker Hub access token) to log in as `mc
 
 ## Host-side deployment
 
-[WUD](https://getwud.app/) runs beside `prod` on this same machine (Docker Desktop via WSL2) and polls Docker Hub for a changed digest behind `:prod` — digest watching explicitly enabled, candidate tags restricted to `prod` (tag-name comparison alone can't detect replacement of a mutable tag). Opt-in policy only, so `dev`, WUD itself, and unrelated containers are never touched.
+[WUD](https://getwud.app/) runs beside `prod` on the production droplet (issue 14) and polls Docker Hub for a changed digest behind `:prod` — digest watching explicitly enabled, candidate tags restricted to `prod` (tag-name comparison alone can't detect replacement of a mutable tag). Opt-in policy only, so `dev`, WUD itself, and unrelated containers are never touched.
 
-WUD polls outward; GitHub needs no inbound access to this host, and no self-hosted runner or SSH deploy secret is required. The image is public on Docker Hub, so no pull credentials are needed on the host side.
+WUD polls outward; GitHub needs no inbound access to the droplet, and no self-hosted runner or SSH deploy secret is required. Public traffic reaches `prod` only through the droplet's existing Traefik over HTTPS at `quiz.bmctiernan.com`. The image is public on Docker Hub, so no pull credentials are needed on the host side.
 
 The updater must preserve `prod`'s port, environment, health check, and restart policy, and must never affect `dev`'s container identity.
 
@@ -45,8 +45,8 @@ The updater must preserve `prod`'s port, environment, health check, and restart 
 2. Implement and pass local tests — issues 3, 4.
 3. Containerize and prove the Make interface — issue 5.
 4. Merge the pipeline; publish the first passing release to Docker Hub — issue 6.
-5. Start `prod` + `wud` via Compose on this host — issue 7.
-6. Confirm `/health` and the footer on `:8090` match the published release.
+5. Start `prod` + `wud` via Compose on the droplet — issue 7.
+6. Confirm `/health` and the footer on `:8090` and on `https://quiz.bmctiernan.com` match the published release — issue 18.
 7. Publish a second passing change and prove WUD updates `prod` without manual recreation — issue 7.
 
 ## Failure and rollback behavior

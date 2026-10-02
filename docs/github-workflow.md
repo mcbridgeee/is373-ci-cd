@@ -44,7 +44,7 @@ Not yet enabled. Plan (to activate once issue 6 has a first passing `verify` run
 - Workflow permissions: start with `contents: read`.
 - Pull requests: verify only, no publishing credentials.
 - `main` pushes: verify, then publish the tested image.
-- Deployment: WUD on this host; no Actions SSH connection required.
+- Deployment: WUD on the production droplet (issue 14); no Actions SSH connection or deploy key required.
 
 A GitHub production environment with approval gates is intentionally skipped — this project demonstrates automatic deployment.
 
