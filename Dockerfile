@@ -37,10 +37,11 @@ COPY --from=dependencies /app/.venv /app/.venv
 COPY app ./app
 
 # Release identity, shown by /health and the page footer (QUIZ-30, QUIZ-31).
+# Baked into a file, not ENV: an updater that recreates the container (WUD)
+# copies the old container's environment, which would report the old commit.
 ARG BUILD_COMMIT=local
 ARG BUILD_TIME=unknown
-ENV BUILD_COMMIT=$BUILD_COMMIT \
-    BUILD_TIME=$BUILD_TIME
+RUN BUILD_COMMIT="$BUILD_COMMIT" BUILD_TIME="$BUILD_TIME" python -c 'import json, os; open("app/release.json", "w").write(json.dumps({"commit": os.environ["BUILD_COMMIT"], "built_at": os.environ["BUILD_TIME"]}))'
 LABEL org.opencontainers.image.source="https://github.com/mcbridgeee/is373-ci-cd" \
       org.opencontainers.image.revision="$BUILD_COMMIT" \
       org.opencontainers.image.created="$BUILD_TIME"
