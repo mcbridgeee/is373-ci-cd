@@ -1,0 +1,61 @@
+name: CI / CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege by default; no job here needs to write to the repository.
+permissions:
+  contents: read
+
+concurrency:
+  # One production group for main pushes (never cancel a publication);
+  # PRs and manual runs cancel their own superseded runs.
+  group: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || format('verify-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
+
+jobs:
+  verify:
+    # Keep this name stable: branch protection requires the "verify" check.
+    name: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      IMAGE: is373-ci-cd:ci
+    steps:
+      - name: Check out the exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned uv
+        run: pipx install uv==0.12.15
+
+      - name: Install locked test dependencies
+        run: make setup
+
+      - name: Unit tests
+        run: make test-unit
+
+      - name: Integration tests
+        run: make test-integration
+
+      - name: Install Chromium and its system libraries
+        run: uv run --frozen playwright install --with-deps --only-shell chromium
+
+      - name: Build release image once (linux/amd64)
+        run: make build
+
+      - name: E2E tests against the release image
+        run: make test-e2e
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
