@@ -4,7 +4,7 @@
 
 IMAGE    ?= is373-ci-cd:local
 E2E_PORT ?= 18090
-COMMIT   := $(shell git rev-parse --short HEAD 2>/dev/null || echo local)
+COMMIT   := $(shell git rev-parse HEAD 2>/dev/null || echo local)$(shell git status --porcelain 2>/dev/null | grep -q . && echo -dirty)
 BUILT_AT := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
 .PHONY: setup browsers test-unit test-integration build test-e2e dev up down status

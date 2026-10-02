@@ -27,7 +27,7 @@ This mirrors the reference repo's calculator: the browser computes an answer ind
 
 ## Health and release identity (QUIZ-3x)
 
-- **QUIZ-30**: `GET /health` returns `200` with a JSON body containing `status: "ok"`, the running `commit` (short git SHA), and `built_at` (UTC build timestamp).
+- **QUIZ-30**: `GET /health` returns `200` with a JSON body containing `status: "ok"`, the running `commit` (full 40-character git SHA, so it matches the `sha-<full-commit>` release tag; changed from the short SHA in #5), and `built_at` (UTC build timestamp).
 - **QUIZ-31**: The frontend footer displays the same `commit` and `built_at` reported by `/health`, so a visitor (or grader) can confirm which release is actually running without reading logs.
 
 ## HTTP contract
@@ -35,7 +35,7 @@ This mirrors the reference repo's calculator: the browser computes an answer ind
 ### `GET /health`
 
 ```json
-{ "status": "ok", "commit": "a1b2c3d", "built_at": "2026-09-22T16:00:00Z" }
+{ "status": "ok", "commit": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "built_at": "2026-09-22T16:00:00Z" }
 ```
 
 ### `POST /api/quiz`
