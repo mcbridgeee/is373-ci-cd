@@ -14,6 +14,19 @@ The documentation phase adds:
 
 Blank issues remain enabled so the forms don't block unusual reports. Issues track development units; the milestone tracks the complete demo. No Project board — the backlog is small enough that one isn't worth the overhead.
 
+## Label palette
+
+Labels are color-grouped so the issue list reads at a glance. Pink, turquoise, and white were chosen as the theme; baby blue is deliberately left out so the set never reads as a pink/white/light-blue flag.
+
+| Family | Meaning | Labels |
+| --- | --- | --- |
+| Pinks | What kind of work it is | `application` (cotton candy), `ci-cd` (raspberry), `documentation` (blush), `enhancement` (bubblegum) |
+| Turquoise | Quality and testing | `testing`, `accessibility`, `good first issue`, `help wanted` |
+| Deep rose / berry | Something is wrong or stuck | `bug`, `blocked` |
+| White | Parked or closed out | `question`, `duplicate`, `invalid`, `wontfix` |
+
+Every label description starts with an emoji so the meaning is readable even without color. Each issue gets exactly one "kind of work" label, plus `blocked` or `bug` when they apply.
+
 ## Branch policy
 
 Not yet enabled. Plan (to activate once issue 6 has a first passing `verify` run on a PR, per the reference repo's sequencing):
