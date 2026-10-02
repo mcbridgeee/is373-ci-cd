@@ -1,13 +1,23 @@
 import requests
 from playwright.sync_api import Page, expect
 
+QUESTION_COUNT = 4
+
+
+def _questions(page: Page):
+    # Questions arrive from /api/questions after load; counting before they
+    # render returns 0 and silently answers nothing.
+    fieldsets = page.locator("fieldset")
+    expect(fieldsets).to_have_count(QUESTION_COUNT)
+    return fieldsets
+
 
 def test_submit_disabled_until_all_questions_answered(page: Page, live_server_url):
     page.goto(live_server_url)
     submit = page.locator("#submit-btn")
     expect(submit).to_be_disabled()
 
-    fieldsets = page.locator("fieldset")
+    fieldsets = _questions(page)
     count = fieldsets.count()
     for i in range(count):
         fieldsets.nth(i).locator("input[type=radio]").first.check()
@@ -20,7 +30,7 @@ def test_submit_disabled_until_all_questions_answered(page: Page, live_server_ur
 def test_quiz_recommends_sensodyne_and_confirms_agreement(page: Page, live_server_url):
     page.goto(live_server_url)
 
-    fieldsets = page.locator("fieldset")
+    fieldsets = _questions(page)
     for i in range(fieldsets.count()):
         fieldsets.nth(i).locator("input[type=radio]").last.check()
 
@@ -41,7 +51,7 @@ def test_footer_release_matches_health_endpoint(page: Page, live_server_url):
 
 
 def _answer_everything(page: Page):
-    fieldsets = page.locator("fieldset")
+    fieldsets = _questions(page)
     for i in range(fieldsets.count()):
         fieldsets.nth(i).locator("input[type=radio]").first.check()
 
