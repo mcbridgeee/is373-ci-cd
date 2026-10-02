@@ -1,3 +1,4 @@
+import os
 import socket
 import subprocess
 import sys
@@ -15,9 +16,18 @@ def _free_port() -> int:
 
 @pytest.fixture(scope="session")
 def live_server_url():
-    """Runs the app with uvicorn directly, per the implementation plan's note
-    that E2E can target a temporary process here; #5 re-points this at the
-    built container image."""
+    """Where the browser tests point.
+
+    If E2E_BASE_URL is set (by scripts/test-e2e.sh / `make test-e2e`), the
+    tests run against that already-running container image. Otherwise they
+    fall back to starting the app with uvicorn, which is handy for a quick
+    local check but does not prove the built image works.
+    """
+    external = os.environ.get("E2E_BASE_URL")
+    if external:
+        yield external.rstrip("/")
+        return
+
     port = _free_port()
     url = f"http://127.0.0.1:{port}"
     process = subprocess.Popen(
