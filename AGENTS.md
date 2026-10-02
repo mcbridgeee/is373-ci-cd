@@ -21,7 +21,7 @@ Build a minimal CI/CD teaching template: FastAPI, pytest, Playwright Python, and
 - Keep development on `8080`, production on `8090`, and E2E containers isolated from both.
 - Configure updater access explicitly; update only production. Never imply a read-only Docker socket mount removes Docker control privileges.
 - Do not add a Sites or other hosting deployment to this Docker-based project.
-- Target `linux/amd64` (this project's host is x86_64 WSL2, unlike the reference repo's ARM64 Mac host) — keep this deviation confined to the Dockerfile/build platform flags, nothing else.
+- Target `linux/amd64` (the production droplet is x86_64; see docs/architecture.md, issue 14) — keep this deviation confined to the Dockerfile/build platform flags, nothing else.
 
 ## Work and review discipline
 

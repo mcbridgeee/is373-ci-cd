@@ -1,6 +1,6 @@
 # Implementation plan
 
-Status: #1–#4 done (docs, decisions, quiz logic, quiz page and tests). #5 (containers and command interface) in review. #6–#8 not started.
+Status: #1–#4 done (docs, decisions, quiz logic, quiz page and tests). #5 onward in progress. #14 moved production to the droplet and added the security and hosting issues below.
 
 Milestone: [v1 — Toothpaste quiz CI/CD demonstration](https://github.com/mcbridgeee/is373-ci-cd/milestone/1).
 
@@ -15,7 +15,13 @@ Milestone: [v1 — Toothpaste quiz CI/CD demonstration](https://github.com/mcbri
 | [#5 — Containers & command interface](https://github.com/mcbridgeee/is373-ci-cd/issues/5) | Dockerfile, compose.yaml, Makefile | #2, #3, #4 | Tests against built image, compose verification |
 | [#6 — GitHub Actions verify + publish](https://github.com/mcbridgeee/is373-ci-cd/issues/6) | Gated pipeline, Docker Hub publish, branch protection | #5 | Passing/failing runs, registry digest, verified protection |
 | [#7 — WUD + rollback](https://github.com/mcbridgeee/is373-ci-cd/issues/7) | Automatic production update, rollback/resume | #2, #5, #6 | Running commit, updater evidence, rollback proof |
-| [#8 — Demo rehearsal + evidence docs](https://github.com/mcbridgeee/is373-ci-cd/issues/8) | Full walkthrough, timings, evidence.md | #4, #6, #7 | Recorded end-to-end evidence |
+| [#14 — Production host decision](https://github.com/mcbridgeee/is373-ci-cd/issues/14) | Droplet at quiz.bmctiernan.com, amd64 only, repo stays private | #2 | Updated architecture/CI docs |
+| [#15 — Security policy, Dependabot, labels as code](https://github.com/mcbridgeee/is373-ci-cd/issues/15) | SECURITY.md, security form, dependabot.yml, label sync | None | Sync workflow run, Dependabot config accepted |
+| [#16 — Scan the tested image](https://github.com/mcbridgeee/is373-ci-cd/issues/16) | Checksum-pinned Trivy gate on fixable HIGH/CRITICAL | #5, #6 | Scan summary and report artifact |
+| [#17 — Harden the HTTP surface](https://github.com/mcbridgeee/is373-ci-cd/issues/17) | Input bounds, CSP and headers, no innerHTML, no prod API docs | #3, #4 | Unit/integration/E2E results |
+| [#18 — Public HTTPS at quiz.bmctiernan.com](https://github.com/mcbridgeee/is373-ci-cd/issues/18) | Traefik overlay, droplet deploy runbook | #6, #7, #17 | Public health, headers, unaffected sites |
+| [#19 — Daily deployed-image rescan](https://github.com/mcbridgeee/is373-ci-cd/issues/19) | Scheduled scan of the live release | #16, #18 | Manual dispatch run |
+| [#8 — Demo rehearsal + evidence docs](https://github.com/mcbridgeee/is373-ci-cd/issues/8) | Full walkthrough, timings, evidence.md | #4, #6, #7, #18 | Recorded end-to-end evidence |
 
 Issue #2 is not a blanket blocker — backend work (#3, #4) can proceed while host/registry decisions are pending.
 
@@ -44,4 +50,4 @@ Include tests with the behavior they verify. Reference the issue in commits; clo
 
 ## Deferred work
 
-Public hosting/TLS beyond this local host, authentication, a database, quiz history, more than 4 questions, a frontend framework, multiple browser engines, automatic rollback, zero-downtime deployment, GitHub Projects automation. Add only through a new issue with a clear teaching purpose.
+Authentication, a database, quiz history, more than 4 questions, a frontend framework, multiple browser engines, automatic rollback, zero-downtime deployment, GitHub Projects automation. Add only through a new issue with a clear teaching purpose.
