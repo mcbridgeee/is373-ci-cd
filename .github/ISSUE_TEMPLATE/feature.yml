@@ -1,7 +1,7 @@
 name: Implementation task
 description: A focused change linked to the project specification.
 title: "[Task] "
-labels: [enhancement]
+labels: ["✨ enhancement"]
 body:
   - type: textarea
     id: outcome

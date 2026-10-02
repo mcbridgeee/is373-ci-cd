@@ -1,0 +1,46 @@
+# Weekly update PRs. Each must pass the same verify job as any other change.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels: ["📦 dependencies"]
+    commit-message:
+      prefix: deps
+    groups:
+      python:
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels: ["📦 dependencies", "🚀 ci-cd"]
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Base image digest in the Dockerfile.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels: ["📦 dependencies", "🔒 security"]
+    commit-message:
+      prefix: build
+
+  # Pinned WUD image in compose.yaml.
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels: ["📦 dependencies"]
+    commit-message:
+      prefix: build

@@ -1,7 +1,7 @@
 name: Specification decision
 description: Resolve an open question or propose a change to the specification.
 title: "[Decision] "
-labels: [question, documentation]
+labels: ["💭 question", "📝 documentation"]
 body:
   - type: textarea
     id: decision
