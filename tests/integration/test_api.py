@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -61,3 +62,63 @@ def test_quiz_submission_rejects_invalid_choice_key():
     )
     assert response.status_code == 422
     assert "answers[1]" in response.json()["detail"]
+
+
+def test_quiz_submission_rejects_unknown_fields():
+    response = client.post(
+        "/api/quiz",
+        json={"answers": ["a", "b", "c", "d"], "client_result": "Sensodyne", "admin": True},
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"answers": ["a"] * 17, "client_result": "Sensodyne"},
+        {"answers": ["a" * 33, "b", "c", "d"], "client_result": "Sensodyne"},
+        {"answers": ["a", "b", "c", "d"], "client_result": "S" * 33},
+    ],
+)
+def test_quiz_submission_rejects_oversized_input(payload):
+    assert client.post("/api/quiz", json=payload).status_code == 422
+
+
+def test_validation_errors_do_not_echo_submitted_input():
+    marker = "<script>alert(1)</script>"
+    response = client.post("/api/quiz", json={"answers": [marker * 3], "client_result": 7})
+    assert response.status_code == 422
+    assert "<script>" not in response.text
+
+
+@pytest.mark.parametrize("path", ["/", "/health", "/api/questions"])
+def test_every_response_carries_security_headers(path):
+    headers = client.get(path).headers
+    csp = headers["content-security-policy"]
+    assert "default-src 'none'" in csp
+    assert "frame-ancestors 'none'" in csp
+    assert "unsafe-inline" not in csp
+    assert "'sha256-" in csp
+    assert headers["x-content-type-options"] == "nosniff"
+    assert headers["referrer-policy"] == "no-referrer"
+    assert "camera=()" in headers["permissions-policy"]
+
+
+def test_api_docs_are_not_served_in_production(monkeypatch):
+    import importlib
+
+    import app.main
+
+    monkeypatch.setenv("APP_ENV", "production")
+    production = TestClient(importlib.reload(app.main).app)
+    try:
+        for path in ("/docs", "/redoc", "/openapi.json"):
+            assert production.get(path).status_code == 404
+        assert production.get("/health").status_code == 200
+    finally:
+        monkeypatch.delenv("APP_ENV")
+        importlib.reload(app.main)
+
+
+def test_api_docs_are_available_in_development():
+    assert client.get("/openapi.json").status_code == 200

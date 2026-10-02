@@ -137,14 +137,21 @@
 
     const resultEl = document.getElementById("result");
     resultEl.classList.remove("hidden", "agree", "disagree");
+    // Build the message from text nodes only (QUIZ-42): nothing from the
+    // server or the page is ever parsed as HTML.
+    const message = document.createElement("p");
     if (body.agree) {
       resultEl.classList.add("agree");
-      resultEl.innerHTML = `<p>Your recommended toothpaste is <strong>${body.server_result}</strong>.</p>`;
+      const product = document.createElement("strong");
+      product.textContent = body.server_result;
+      message.append("Your recommended toothpaste is ", product, ".");
     } else {
       resultEl.classList.add("disagree");
-      resultEl.innerHTML =
-        `<p class="warning">Client and server disagree — client said "${client_result}", server said "${body.server_result}". Not trusting either blindly.</p>`;
+      message.className = "warning";
+      message.textContent =
+        `Client and server disagree — client said "${client_result}", server said "${body.server_result}". Not trusting either blindly.`;
     }
+    resultEl.replaceChildren(message);
   }
 
   document.getElementById("quiz-form").addEventListener("submit", handleSubmit);

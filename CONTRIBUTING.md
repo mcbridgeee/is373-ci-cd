@@ -41,10 +41,11 @@ Start with `make setup` and `make browsers` when running tests locally.
 | `make test-integration` | Run only in-process API integration tests |
 | `make build` | Build a release image with commit and build metadata; no publication |
 | `make test-e2e` | Test the already-built image in an isolated container; collect failures and clean up |
-| `make up` | Start dev, published prod, and WUD after bootstrap |
+| `make up` | Start dev, published prod, and WUD (prod needs a published `prod` image, which arrives with #6) |
+| `make status` | Show running services and the release each reports on `/health` |
 | `make down` | Stop this project's Compose services without deleting unrelated resources |
-| `make rollback RELEASE=<sha-tag-or-digest>` | Pause updater and redeploy only prod to a known-good release |
-| `make resume-updates` | Restore the production channel and resume updates deliberately |
+| `make rollback RELEASE=<sha-tag-or-digest>` | Pause updater and redeploy only prod to a known-good release (added in #7) |
+| `make resume-updates` | Restore the production channel and resume updates deliberately (added in #7) |
 
 `IMAGE` selects the locally built/tested image; `E2E_PORT` changes the isolated browser-test port.
 

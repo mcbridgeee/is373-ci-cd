@@ -1,6 +1,6 @@
 # CI/CD specification
 
-Status: not yet implemented. This document is the contract issue 6 (pipeline) and issue 7 (deployment) build against; update the status line as each stage is actually exercised, with evidence, not just written.
+Status: pipeline implemented in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (issue 6); publication is proven only once a `main` run has pushed to Docker Hub. Deployment (issue 7) not yet implemented. Update this line as each stage is actually exercised, with evidence, not just written.
 
 ## Pipeline contract
 
@@ -29,7 +29,7 @@ Record the published digest in the workflow summary. On rerun, reuse/verify the 
 
 Serialize release workflows with one production concurrency group; do not cancel an in-progress publication. Before promotion, verify the run still represents the current `main` head, so a stale rerun can't move `:prod` backward. PR runs can cancel superseded runs of themselves.
 
-Use the `DOCKER_PAT` Actions secret (a Docker Hub access token) to log in as `mcbridgeee`. Least-privilege permissions (`contents: read` unless a step needs more), pin third-party actions to a commit SHA, keep dependency versions reproducible (locked via `pyproject.toml`/lockfile).
+Use the `DOCKER_PAT` Actions secret (a Docker Hub access token) to log in as `mcbridgeee`, through `docker login --password-stdin` in the publish job only, then log out. Least-privilege permissions (`contents: read` unless a step needs more), pin third-party actions to a commit SHA, keep dependency versions reproducible (locked via `pyproject.toml`/lockfile).
 
 ## Host-side deployment
 

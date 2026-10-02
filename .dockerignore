@@ -1,0 +1,8 @@
+# Allowlist: send only what the image needs to the Docker build.
+# Tests, docs, .env files, and local state never enter the image.
+*
+!pyproject.toml
+!uv.lock
+!app/
+!app/*.py
+!app/index.html

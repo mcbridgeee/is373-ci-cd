@@ -1,0 +1,70 @@
+# Three services on one machine, kept separate on purpose:
+#   dev   your live-editing copy, built from local source  -> http://127.0.0.1:8080
+#   prod  the published image from Docker Hub              -> http://127.0.0.1:8090
+#   wud   What's Up Docker, watches prod for new images    -> http://127.0.0.1:8091
+# Recreating prod never touches dev, and vice versa.
+name: is373-ci-cd
+
+services:
+  dev:
+    build:
+      context: .
+    image: is373-ci-cd-dev:local
+    ports:
+      - "127.0.0.1:${DEV_PORT:-8080}:8000"
+    environment:
+      BUILD_COMMIT: dev
+      BUILD_TIME: live-reload
+    volumes:
+      # Read-only mount of your source, so edits show up without rebuilding.
+      - ./app:/app/app:ro
+    command: [uvicorn, app.main:app, --host, 0.0.0.0, --port, "8000", --reload]
+    labels:
+      wud.watch: "false"
+    restart: unless-stopped
+
+  prod:
+    # Only ever a published, tested image. Exists on Docker Hub once issue #6 publishes it.
+    image: ${PROD_IMAGE:-mcbridgeee/is373-ci-cd:prod}
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+    ports:
+      - "127.0.0.1:8090:8000"
+    restart: unless-stopped
+    labels:
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.tag.include: "^prod$$"
+      wud.trigger.include: docker.production
+
+  wud:
+    image: getwud/wud:9.0.2@sha256:257b2221f201a0231db295b662882c5873ff72dc687be94dbae2e15f5394f151
+    ports:
+      - "127.0.0.1:8091:3000"
+    env_file:
+      - path: ./.state/wud.env
+        required: false
+    environment:
+      WUD_WATCHER_LOCAL_WATCHBYDEFAULT: "false"
+      WUD_WATCHER_LOCAL_WATCHDIGESTDEFAULT: "true"
+      WUD_WATCHER_LOCAL_CRON: "* * * * *"
+      WUD_WATCHER_LOCAL_JITTER: "1000"
+      WUD_TRIGGER_DOCKER_PRODUCTION_AUTO: "true"
+      WUD_TRIGGER_DOCKER_PRODUCTION_PRUNE: "false"
+      WUD_TRIGGER_DOCKER_PRODUCTION_DRYRUN: "false"
+    volumes:
+      # WUD needs the Docker socket to replace prod. This is powerful host
+      # access, which is why WUD is only reachable on 127.0.0.1.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - wud-data:/store
+    labels:
+      wud.watch: "false"
+    restart: unless-stopped
+
+volumes:
+  wud-data:

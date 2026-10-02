@@ -27,15 +27,27 @@ This mirrors the reference repo's calculator: the browser computes an answer ind
 
 ## Health and release identity (QUIZ-3x)
 
-- **QUIZ-30**: `GET /health` returns `200` with a JSON body containing `status: "ok"`, the running `commit` (short git SHA), and `built_at` (UTC build timestamp).
+- **QUIZ-30**: `GET /health` returns `200` with a JSON body containing `status: "ok"`, the running `commit` (full 40-character git SHA, so it matches the `sha-<full-commit>` release tag; changed from the short SHA in #5), and `built_at` (UTC build timestamp).
 - **QUIZ-31**: The frontend footer displays the same `commit` and `built_at` reported by `/health`, so a visitor (or grader) can confirm which release is actually running without reading logs.
+
+## Security (QUIZ-4x)
+
+Added in issue 17, before the quiz is served publicly.
+
+- **QUIZ-40**: `POST /api/quiz` rejects unknown fields and oversized input with `422`: at most 16 `answers`, each answer and `client_result` at most 32 characters. These outer bounds sit in front of QUIZ-20/21, which still decide the exact rules.
+- **QUIZ-41**: Validation error bodies never echo the submitted input back.
+- **QUIZ-42**: The page renders server- and client-supplied values as text (`textContent`), never as HTML.
+- **QUIZ-43**: Every response carries a Content Security Policy that allows only same-origin requests and the page's own inline script and style by SHA-256 hash (no `unsafe-inline`), plus `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `frame-ancestors 'none'`, and a `Permissions-Policy` that disables camera, microphone, and geolocation.
+- **QUIZ-44**: With `APP_ENV=production`, the interactive API docs (`/docs`, `/redoc`, `/openapi.json`) are not served.
+
+HSTS is set by the TLS terminator (Traefik on the droplet), not the app, because only it knows the connection is HTTPS.
 
 ## HTTP contract
 
 ### `GET /health`
 
 ```json
-{ "status": "ok", "commit": "a1b2c3d", "built_at": "2026-09-22T16:00:00Z" }
+{ "status": "ok", "commit": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "built_at": "2026-09-22T16:00:00Z" }
 ```
 
 ### `POST /api/quiz`
