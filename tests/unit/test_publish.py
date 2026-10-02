@@ -33,12 +33,18 @@ def test_current_main_push_is_publishable():
         ("pull_request", "refs/heads/main", COMMIT),
         ("workflow_dispatch", "refs/heads/main", COMMIT),
         ("push", "refs/heads/feature", COMMIT),
-        ("push", "refs/heads/main", "c" * 40),
     ],
 )
-def test_prs_manual_runs_other_branches_and_stale_commits_are_refused(event, ref, head):
+def test_prs_manual_runs_and_other_branches_are_refused(event, ref, head):
     with pytest.raises(ValueError):
         publish.validate_release(event, ref, COMMIT, head)
+
+
+def test_older_main_commit_is_superseded_not_failed():
+    # Two quick merges: the older run must not move prod, and must not go red.
+    with pytest.raises(publish.Superseded):
+        publish.validate_release("push", "refs/heads/main", COMMIT, "c" * 40)
+    assert not issubclass(publish.Superseded, ValueError)
 
 
 def test_short_sha_is_refused():
