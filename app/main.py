@@ -90,7 +90,12 @@ async def validation_error(_request, error):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "commit": BUILD_COMMIT, "built_at": BUILD_TIME}
+    return {
+        "status": "ok",
+        "commit": BUILD_COMMIT,
+        "built_at": BUILD_TIME,
+        "environment": os.environ.get("APP_ENV", "development"),
+    }
 
 
 @app.get("/api/questions")
