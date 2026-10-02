@@ -12,17 +12,27 @@ Keeping arithmetic (`quiz.py`) separate from HTTP (`main.py`) separate from the 
 
 - **Language/framework**: Python 3, FastAPI, matching the reference repo and this course's established pattern.
 - **Frontend**: no framework, no bundler, no CDN dependency — a single static HTML file served by FastAPI, so there is nothing to build beyond the Docker image itself.
-- **Container platform**: `linux/amd64`. The reference repo targets `linux/arm64` because it was built and verified on Apple Silicon; this project's host is a Windows/WSL2 machine (x86_64), so the Dockerfile, CI build step, and `docker compose` configuration all target `linux/amd64` instead. This is the one deliberate deviation from the reference repo's platform choice — the pipeline shape is unchanged.
+- **Container platform**: `linux/amd64`. The reference repo now builds both AMD64 and ARM64; this project builds only AMD64 because its production host, a DigitalOcean droplet, is x86_64 (see issue 14). The pipeline shape is unchanged.
 - **Ports**: development `8080`, production `8090`, WUD dashboard `8091`, matching the reference repo's convention so the two projects stay easy to compare.
 - **Image identity**: `mcbridgeee/is373-ci-cd` on Docker Hub, tagged `sha-<full-commit>` (immutable by convention) and `prod` (mutable, moved only after a tested image is confirmed).
 
 ## Environment decisions (issue 2, recorded 2026-09-22)
 
-- **Host**: this machine — Docker Desktop via WSL2 (Ubuntu distro). Docker Desktop's WSL integration was already enabled for this distro; `docker ps` runs directly from this shell with no further setup.
+- **Host** (development only since issue 14): this machine — Docker Desktop via WSL2 (Ubuntu distro). Docker Desktop's WSL integration was already enabled for this distro; `docker ps` runs directly from this shell with no further setup.
 - **GitHub repo visibility**: `mcbridgeee/is373-ci-cd` stays **private** for now (deliberate choice, revisit later if needed). This means public-repo Actions minutes don't apply — usage counts against the account's private-repo Actions minutes.
 - **Docker Hub image visibility**: `mcbridgeee/is373-ci-cd` is **public** on Docker Hub, created manually (not auto-created via push) so it never defaulted to private. Confirmed via `GET https://hub.docker.com/v2/repositories/mcbridgeee/is373-ci-cd/` → `"is_private": false`. Because the image is public, WUD needs no pull credentials on the host even though the GitHub repo itself is private.
 - **Docker Hub username**: `mcbridgeee` (not a secret).
 - **Registry credential**: `DOCKER_PAT` — a Docker Hub personal access token (Read & Write scope), added as a GitHub Actions repository secret directly through the GitHub web UI (Settings → Secrets and variables → Actions), so the raw value never passed through any local shell, chat, or file. Confirmed present via `gh secret list` (name only).
+
+## Hosting decision (issue 14, recorded 2026-10-02)
+
+Supersedes the **Host** line above. The local machine is now development only.
+
+- **Production host**: the `server-of-love` DigitalOcean droplet (Ubuntu, x86_64), which already runs Traefik with Let's Encrypt for bmctiernan.com, www, and report. Its setup lives in [mcbridgeee/server-of-love](https://github.com/mcbridgeee/server-of-love), following [373_hosting](https://github.com/kaw393939/373_hosting).
+- **Public name**: `https://quiz.bmctiernan.com`. The quiz's `prod` container joins Traefik's existing Docker network through a local, untracked `compose.override.yaml`. It starts no second proxy and publishes no new public port; `8090` and WUD's `8091` stay on `127.0.0.1`.
+- **Platform**: `linux/amd64` only (see Runtime decisions).
+- **Repository visibility**: stays private. Commit metadata includes a personal email address that would become public. Dependabot alerts and updates still work on a private repository; CodeQL and secret-scanning push protection would need the repository to be public.
+- **Unchanged from issue 2**: Docker Hub `mcbridgeee/is373-ci-cd` (public image), the `DOCKER_PAT` Actions secret, and WUD needing no pull credentials.
 
 ## Docker Compose services
 
