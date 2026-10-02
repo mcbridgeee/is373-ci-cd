@@ -1,6 +1,6 @@
 # Implementation plan
 
-Status: #1–#4 done (docs, decisions, quiz logic, quiz page and tests). #5 onward in progress. #14 moved production to the droplet and added the security and hosting issues below.
+Status (2026-10-02): code complete through #19 and published to Docker Hub. #5, #14–#17, and #28 are closed. #6 waits on the branch ruleset; #7, #18, and #19 wait on the droplet deploy (rehearsed in a sandbox, see the #7 issue comment); #8 records the real demo.
 
 Milestone: [v1 — Toothpaste quiz CI/CD demonstration](https://github.com/mcbridgeee/is373-ci-cd/milestone/1).
 

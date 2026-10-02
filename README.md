@@ -4,7 +4,7 @@ A small FastAPI toothpaste-recommendation quiz that makes the path from a local 
 
 This repo follows the development and delivery process demonstrated in [kaw393939/is373_ci_cd](https://github.com/kaw393939/is373_ci_cd) — structure and workflow only; the application content is intentionally different.
 
-**Status:** the quiz, its API, and unit/integration/browser tests are done (#3, #4). Containers, the CI/CD pipeline, and public hosting at `quiz.bmctiernan.com` are in progress. See the [implementation plan](docs/implementation-plan.md) for the ordered backlog.
+**Status:** the quiz, its tests, hardened container, CI/CD pipeline (test → scan → publish), and WUD deploy/rollback tooling are done and published to Docker Hub. Going live at `https://quiz.bmctiernan.com` is the next step; see the [hosting runbook](docs/hosting.md) and the [implementation plan](docs/implementation-plan.md).
 
 ## Delivery flow (target)
 
@@ -21,7 +21,7 @@ flowchart LR
 
 Only a passing `main` push publishes. PRs and manual verification never publish. Each release gets a `sha-<full-commit>` tag and the mutable `prod` channel.
 
-## Run the demo (once implemented)
+## Run the demo locally
 
 ```sh
 git clone git@github.com:mcbridgeee/is373-ci-cd.git
@@ -37,7 +37,7 @@ make up
 | Production | [localhost:8090](http://localhost:8090) | Last passing image from Docker Hub |
 | WUD dashboard | [localhost:8091](http://localhost:8091) | Authenticated image monitoring and updates |
 
-## Test and operate (once implemented)
+## Test and operate
 
 ```sh
 make test-unit          # Pure Python quiz-scoring logic and validation
