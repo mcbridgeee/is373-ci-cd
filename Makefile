@@ -1,13 +1,13 @@
 # Command interface for the toothpaste quiz (see CONTRIBUTING.md).
-# Every target is a short, readable shell recipe on purpose, so you can see
-# exactly what each command does.
+# Build and test targets are short shell recipes so you can read exactly what
+# they do. Production lifecycle lives in scripts/runtime.py because it keeps state.
 
 IMAGE    ?= is373-ci-cd:local
 E2E_PORT ?= 18090
 COMMIT   := $(shell git rev-parse HEAD 2>/dev/null || echo local)$(shell git status --porcelain 2>/dev/null | grep -q . && echo -dirty)
 BUILT_AT := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-.PHONY: setup browsers test-unit test-integration build test-e2e scan dev up down status
+.PHONY: setup browsers test-unit test-integration build test-e2e scan dev up deploy verify-production rollback pause-updates resume-updates check-updates down status
 
 ## Install Python dependencies (including test tools) from uv.lock.
 setup:
@@ -45,16 +45,17 @@ scan:
 dev:
 	docker compose up -d --build dev
 
-## Start dev, prod (published image), and WUD.
-up:
-	docker compose up -d --build
+## Production lifecycle (scripts/runtime.py). Each command honors a persisted
+## rollback in .state/ and a local compose.override.yaml.
+##   up                 dev + published prod + WUD (local demo)
+##   deploy             published prod + WUD only; no build (the droplet)
+##   verify-production  running image ID and /health commit match the selection
+##   rollback           RELEASE=sha-<full commit> or sha256:<digest>; pauses WUD
+##   resume-updates     back to the prod tag, then WUD resumes
+export RELEASE
+up deploy verify-production rollback pause-updates resume-updates check-updates status:
+	python3 scripts/runtime.py $@
 
 ## Stop this project's services. Keeps volumes and anything not in compose.yaml.
 down:
 	docker compose down
-
-## Show the services and what release each one reports.
-status:
-	@docker compose ps
-	@echo "dev  /health: $$(curl -fsS http://127.0.0.1:8080/health 2>/dev/null || echo 'not running')"
-	@echo "prod /health: $$(curl -fsS http://127.0.0.1:8090/health 2>/dev/null || echo 'not running')"

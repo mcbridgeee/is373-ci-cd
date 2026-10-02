@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import json
 import os
 import re
 from pathlib import Path
@@ -12,8 +13,17 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from app.quiz import QUESTIONS, QuizValidationError, score_quiz
 
-BUILD_COMMIT = os.environ.get("BUILD_COMMIT", "dev")
-BUILD_TIME = os.environ.get("BUILD_TIME", "unknown")
+RELEASE_FILE = Path(__file__).with_name("release.json")
+
+
+def release_identity(path: Path = RELEASE_FILE) -> dict:
+    """The image's baked release (QUIZ-30); environment variables only outside images."""
+    if path.exists():
+        return json.loads(path.read_text())
+    return {"commit": os.environ.get("BUILD_COMMIT", "dev"), "built_at": os.environ.get("BUILD_TIME", "unknown")}
+
+
+RELEASE = release_identity()
 
 PRODUCTION = os.environ.get("APP_ENV") == "production"
 
@@ -90,7 +100,12 @@ async def validation_error(_request, error):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "commit": BUILD_COMMIT, "built_at": BUILD_TIME}
+    return {
+        "status": "ok",
+        "commit": RELEASE["commit"],
+        "built_at": RELEASE["built_at"],
+        "environment": os.environ.get("APP_ENV", "development"),
+    }
 
 
 @app.get("/api/questions")

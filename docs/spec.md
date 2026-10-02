@@ -29,6 +29,7 @@ This mirrors the reference repo's calculator: the browser computes an answer ind
 
 - **QUIZ-30**: `GET /health` returns `200` with a JSON body containing `status: "ok"`, the running `commit` (full 40-character git SHA, so it matches the `sha-<full-commit>` release tag; changed from the short SHA in #5), and `built_at` (UTC build timestamp).
 - **QUIZ-31**: The frontend footer displays the same `commit` and `built_at` reported by `/health`, so a visitor (or grader) can confirm which release is actually running without reading logs.
+- **QUIZ-32**: `/health` also reports `environment` (`production` in the release image, `development` otherwise), so a deployment check can't mistake the dev service for production. Added in #7.
 
 ## Security (QUIZ-4x)
 
@@ -47,7 +48,7 @@ HSTS is set by the TLS terminator (Traefik on the droplet), not the app, because
 ### `GET /health`
 
 ```json
-{ "status": "ok", "commit": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "built_at": "2026-09-22T16:00:00Z" }
+{ "status": "ok", "commit": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "built_at": "2026-09-22T16:00:00Z", "environment": "production" }
 ```
 
 ### `POST /api/quiz`

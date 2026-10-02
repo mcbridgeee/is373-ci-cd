@@ -41,11 +41,15 @@ Start with `make setup` and `make browsers` when running tests locally.
 | `make test-integration` | Run only in-process API integration tests |
 | `make build` | Build a release image with commit and build metadata; no publication |
 | `make test-e2e` | Test the already-built image in an isolated container; collect failures and clean up |
-| `make up` | Start dev, published prod, and WUD (prod needs a published `prod` image, which arrives with #6) |
-| `make status` | Show running services and the release each reports on `/health` |
+| `make scan` | Scan the built image with the pinned Trivy; fails on fixable HIGH/CRITICAL (#16) |
+| `make up` | Start dev, published prod, and WUD (local demonstration) |
+| `make deploy` | Start only published prod and WUD; no build, no dev (the droplet). Honors a rollback pause and the local override |
+| `make verify-production` | Check the running prod container's image ID and `/health` commit and environment against the selected release |
+| `make check-updates` | Ask WUD to check Docker Hub now instead of waiting for its one-minute poll |
+| `make status` | Show running services, update state, selected prod image, and prod `/health` |
 | `make down` | Stop this project's Compose services without deleting unrelated resources |
-| `make rollback RELEASE=<sha-tag-or-digest>` | Pause updater and redeploy only prod to a known-good release (added in #7) |
-| `make resume-updates` | Restore the production channel and resume updates deliberately (added in #7) |
+| `make rollback RELEASE=<sha-full-commit or sha256:digest>` | Pause WUD, pin prod to a known-good release in `.state/release.env`, verify it |
+| `make resume-updates` | Return prod to the `prod` tag, verify it, then resume WUD |
 
 `IMAGE` selects the locally built/tested image; `E2E_PORT` changes the isolated browser-test port.
 

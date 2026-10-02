@@ -13,6 +13,7 @@ def test_health_returns_ok_with_release_metadata():
     assert body["status"] == "ok"
     assert "commit" in body
     assert "built_at" in body
+    assert body["environment"] == "development"
 
 
 def test_questions_endpoint_returns_four_questions_with_four_choices_each():
