@@ -113,6 +113,11 @@ done                                                      # all still 200
 
 The commit must equal the one in the latest **CI / CD → publish** run summary on GitHub. Then open the page in a browser, take the quiz, and check the footer shows the same commit.
 
+### 6. After it's live
+
+- In GitHub, add the repository variable `DEPLOYED_SCAN_ENABLED` = `true` (**Settings → Secrets and variables → Actions → Variables**) so the live release gets rescanned daily (issue 19). Then **Actions → Deployed image security → Run workflow** once to see it pass.
+- Turn on the `main` branch ruleset described in [github-workflow.md](github-workflow.md#branch-policy).
+
 ## Day to day
 
 | Task | Command (in `~/is373-ci-cd`) |
@@ -137,6 +142,7 @@ Keep `.state/`, `.env`, and `compose.override.yaml`. They hold the rollback pin,
 | `404 page not found` from Traefik | Router missing or wrong host | `sudo docker inspect is373-ci-cd-prod-1 --format '{{json .Config.Labels}}'` |
 | Browser certificate warning | DNS not pointing here yet, or Let's Encrypt still issuing | `dig +short quiz.bmctiernan.com`; `sudo docker logs hosting373-traefik-1 \| grep -i acme` |
 | `502 Bad Gateway` | prod not on `hosting-web`, or not healthy | `sudo make status` |
+| `404 page not found` for a few seconds right after an update or rollback | Traefik picks up the new container once it starts (about 2–4 s in the rehearsal) | wait; if it lasts, check `sudo make status` |
 | `verify-production` fails on commit | WUD replaced prod mid-check, or an old release | rerun; roll back only to releases from #7 onward |
 | `429 Too Many Requests` on pull | Docker Hub's anonymous pull limit for this IP | wait and retry; WUD checks only every 5 minutes to stay well under it |
 | `curl -I` shows `405` | The app answers GET, not HEAD | use the GET-based checks above |

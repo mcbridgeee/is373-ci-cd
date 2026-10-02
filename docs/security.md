@@ -42,6 +42,12 @@ The gate does work. A sandbox build that skipped the Dockerfile's `apt-get upgra
 
 This is a point-in-time result, not proof that the image has no vulnerabilities. New CVEs appear after release, which is why #19 rescans the deployed release daily.
 
+## Daily rescan of the live release (issue 19)
+
+[`deployed-image-security.yml`](../.github/workflows/deployed-image-security.yml) runs daily at 07:17 UTC. It reads the commit from `https://quiz.bmctiernan.com/health`, validates it (status ok, production, 40 hex characters), pulls the immutable `sha-<commit>` tag rather than the moving `prod` tag, and applies the same scanner and policy as CI. A failing run emails the repository owner. That email is the alert to merge the pending Dependabot base-image PR, or to rebuild.
+
+Scheduled runs are off until the site is live. Turn them on with the repository variable `DEPLOYED_SCAN_ENABLED=true` (**Settings → Secrets and variables → Actions → Variables**). **Actions → Deployed image security → Run workflow** runs it on demand at any time.
+
 ## Known gaps
 
 - No rate limiting or authentication on the quiz (out of v1 scope).
