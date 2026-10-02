@@ -68,6 +68,12 @@ The updater must preserve `prod`'s port, environment, health check, and restart 
 
 `make resume-updates` restores the `:prod` channel and resumes the updater once the desired release is verified — implemented in `scripts/runtime.py`, matching the reference repo's approach.
 
+The pinned release lives in `.state/release.env` and wins over an exported `PROD_IMAGE`, so a stray shell variable can't undo a rollback. Keep `.state/` across operations. Releases published before #7 don't report `environment` and fail `make verify-production`; roll back only to a release from #7 onward.
+
+### Why release identity is baked into a file
+
+A sandbox run of WUD (issue 7) showed that when it replaces `prod` with a newer image, it **copies the old container's environment variables**. With the commit stored in `ENV BUILD_COMMIT`, the updated container kept reporting the previous commit, so `/health` lied about what was running. The image now writes `app/release.json` at build time and `/health` reads that file, which a recreated container can't inherit. Any other `ENV` set in the Dockerfile is also copied forward by WUD, so release-specific values must never live there.
+
 ## Completion evidence
 
 For the deployment issue: record the workflow URL, commit, published digest, WUD update evidence, and the `/health` response from `:8090`. A green publishing run alone is not deployment evidence.
