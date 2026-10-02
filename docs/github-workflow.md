@@ -20,12 +20,16 @@ Labels are color-grouped so the issue list reads at a glance. Pink, turquoise, a
 
 | Family | Meaning | Labels |
 | --- | --- | --- |
-| Pinks | What kind of work it is | `application` (cotton candy), `ci-cd` (raspberry), `documentation` (blush), `enhancement` (bubblegum) |
-| Turquoise | Quality and testing | `testing`, `accessibility`, `good first issue`, `help wanted` |
-| Deep rose / berry | Something is wrong or stuck | `bug`, `blocked` |
-| White | Parked or closed out | `question`, `duplicate`, `invalid`, `wontfix` |
+| Pinks | What kind of work it is | `💗 application` (cotton candy), `🚀 ci-cd` (raspberry), `🏠 hosting` (hot pink), `📝 documentation` (blush), `✨ enhancement` (bubblegum) |
+| Turquoise | Quality, safety, and testing | `🧪 testing`, `🔒 security`, `📦 dependencies`, `♿ accessibility`, `🌱 good first issue`, `🙋 help wanted` |
+| Deep rose / berry | Something is wrong or stuck | `🐛 bug`, `⛔ blocked` |
+| White | Parked or closed out | `💭 question`, `👯 duplicate`, `🙅 invalid`, `🌙 wontfix` |
 
-Every label description starts with an emoji so the meaning is readable even without color. Each issue gets exactly one "kind of work" label, plus `blocked` or `bug` when they apply.
+Every label name and description starts with an icon so the meaning is readable even without color. Each issue gets exactly one "kind of work" label, plus `⛔ blocked` or `🐛 bug` when they apply.
+
+### Labels as code (issue 15)
+
+[`.github/labels.json`](../.github/labels.json) is the source of truth. On a push to `main` that changes it, [`labels.yml`](../.github/workflows/labels.yml) runs [`scripts/sync-labels.py`](../scripts/sync-labels.py) with an `issues: write` token. It creates missing labels, fixes colors and descriptions, and renames a label found under one of its `aliases`, so issues keep their labels through a rename. It never deletes a label. To change a label, edit the JSON in a PR rather than the settings page; a settings-page edit is overwritten on the next sync.
 
 ## Branch policy
 
