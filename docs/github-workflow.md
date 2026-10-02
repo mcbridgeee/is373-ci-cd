@@ -33,19 +33,39 @@ Every label name and description starts with an icon so the meaning is readable 
 
 ## Branch policy
 
-Not yet enabled. Plan (to activate once issue 6 has a first passing `verify` run on a PR, per the reference repo's sequencing):
+Activate once the `verify` check has passed at least once on a PR (issue 6), so GitHub can offer it as a required check. In **Settings → Rules → Rulesets → New branch ruleset**:
 
-- Require a PR into `main`.
-- Require the `verify` check to be passing and up to date.
-- Block force pushes and branch deletion on `main`.
-- Enforce for administrators too (no bypass, even solo).
-- **Zero required reviewer approvals** — this is a solo-maintainer teaching repo, same as the reference.
+- Name `main`, enforcement **Active**, target **Include default branch**, and leave the bypass list **empty** (no admin bypass, even solo).
+- **Restrict deletions** and **Block force pushes**.
+- **Require a pull request before merging**, with **0** required approvals (solo maintainer, same as the reference repo). Allowed merge method: **Merge** only, so atomic commits survive.
+- **Require status checks to pass**: add `verify` and turn on **Require branches to be up to date before merging**.
+
+After saving, record the date here and link the first PR it applied to.
+
+## Repository settings checklist
+
+Settings that live outside the code, so they can't be reviewed in a PR. Check them once and after any change:
+
+- **Settings → Actions → General → Workflow permissions**: *Read repository contents and packages permissions*; leave *Allow GitHub Actions to create and approve pull requests* off. Workflows that need more ask for it explicitly (`labels.yml` asks for `issues: write`).
+- **Settings → Advanced Security** (or **Code security**): turn on **Dependabot alerts** and **Dependabot security updates**. Both work on private repositories.
+- **Settings → General → Pull Requests**: allow only **merge commits**; turn on **Automatically delete head branches**.
+- **Settings → Secrets and variables → Actions**: only `DOCKER_PAT`. Rotate it on Docker Hub if it is ever printed, and at least once per semester.
+
+Not available while the repository is private: CodeQL code scanning, secret scanning, and push protection. If the repository is made public, turn those on too. Making it public also publishes the email address in existing commit metadata.
+
+## Dependabot (issue 15)
+
+[`.github/dependabot.yml`](../.github/dependabot.yml) opens grouped PRs every Monday for Python packages in `uv.lock`, GitHub Actions SHAs, the Dockerfile's base image digest, and the WUD image in `compose.yaml`. They go through the same `verify` job as any change; merge them like any other PR. A base-image update is how fixed Debian vulnerabilities reach production.
+
+## Security policy (issue 15)
+
+[`SECURITY.md`](../SECURITY.md) sends vulnerability reports away from public issues. The issue chooser links to it. The **Security hardening** form (`security.yml`) is for planning non-sensitive hardening work and asks the author to confirm it contains no secrets.
 
 ## Automation and credentials
 
 - Repository secret: `DOCKER_PAT` — a Docker Hub access token for `mcbridgeee`, scoped to push this one repository's image (Read & Write). Set on 2026-09-22 via the GitHub web UI, ahead of issue 6; confirmed present via `gh secret list` (name only), value never printed or committed.
 - Non-secret Docker Hub username: `mcbridgeee`. Docker Hub repo `mcbridgeee/is373-ci-cd` created manually as public on 2026-09-22.
-- Workflow permissions: start with `contents: read`.
+- Workflow permissions: `contents: read` at the top of every workflow; a job asks for more only when it needs it.
 - Pull requests: verify only, no publishing credentials.
 - `main` pushes: verify, then publish the tested image.
 - Deployment: WUD on the production droplet (issue 14); no Actions SSH connection or deploy key required.
