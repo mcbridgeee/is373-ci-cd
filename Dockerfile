@@ -28,7 +28,7 @@ ENV PATH="/app/.venv/bin:$PATH" \
 # Nothing installs packages at runtime, so remove the installers (and the
 # vulnerabilities that ship with them), then add an unprivileged user.
 RUN python -m pip uninstall --yes pip setuptools \
-    && rm -rf /usr/local/lib/python3.13/ensurepip \
+    && python -c "import ensurepip, pathlib, shutil; shutil.rmtree(pathlib.Path(ensurepip.__file__).parent)" \
     && groupadd --gid 10001 appuser \
     && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin appuser
 
