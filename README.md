@@ -4,7 +4,7 @@ A small FastAPI toothpaste-recommendation quiz that makes the path from a local 
 
 This repo follows the development and delivery process demonstrated in [kaw393939/is373_ci_cd](https://github.com/kaw393939/is373_ci_cd) — structure and workflow only; the application content is intentionally different.
 
-**Status: documentation and GitHub workflow bootstrap (issue 1).** Nothing is implemented yet. See the [implementation plan](docs/implementation-plan.md) for what's next and in what order.
+**Status:** the quiz, its API, and unit/integration/browser tests are done (#3, #4). Containers, the CI/CD pipeline, and public hosting at `quiz.bmctiernan.com` are in progress. See the [implementation plan](docs/implementation-plan.md) for the ordered backlog.
 
 ## Delivery flow (target)
 
