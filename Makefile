@@ -7,7 +7,7 @@ E2E_PORT ?= 18090
 COMMIT   := $(shell git rev-parse HEAD 2>/dev/null || echo local)$(shell git status --porcelain 2>/dev/null | grep -q . && echo -dirty)
 BUILT_AT := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-.PHONY: setup browsers test-unit test-integration build test-e2e dev up deploy verify-production rollback pause-updates resume-updates check-updates down status
+.PHONY: setup browsers test-unit test-integration build test-e2e scan dev up deploy verify-production rollback pause-updates resume-updates check-updates down status
 
 ## Install Python dependencies (including test tools) from uv.lock.
 setup:
@@ -35,6 +35,11 @@ build:
 ## Browser tests against the built image in a throwaway container.
 test-e2e:
 	IMAGE=$(IMAGE) E2E_PORT=$(E2E_PORT) bash scripts/test-e2e.sh
+
+## Scan the built image with the pinned Trivy; fails on fixable HIGH/CRITICAL.
+scan:
+	sh scripts/install-trivy.sh
+	python3 scripts/scan-image.py $(IMAGE) artifacts/security
 
 ## Start only dev on :8080 (no published image needed).
 dev:

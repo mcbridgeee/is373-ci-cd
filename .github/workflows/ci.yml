@@ -51,6 +51,12 @@ jobs:
       - name: E2E tests against the release image
         run: make test-e2e
 
+      - name: Install checksum-pinned image scanner
+        run: sh scripts/install-trivy.sh
+
+      - name: Scan the exact tested image (blocks fixable HIGH/CRITICAL)
+        run: python3 scripts/scan-image.py "$IMAGE" artifacts/security
+
       - name: Export the exact tested image (no rebuild later)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |

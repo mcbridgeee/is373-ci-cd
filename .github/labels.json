@@ -1,0 +1,22 @@
+{
+  "_comment": "Source of truth for repository labels. Edit here; .github/workflows/labels.yml applies it on main. 'aliases' are old names that get renamed in place so issues keep their labels. Palette: pinks = kind of work, turquoise = quality, berry = wrong or stuck, white = parked. No baby blue.",
+  "labels": [
+    {"name": "💗 application", "color": "f9a8d4", "description": "💗 Quiz app code: frontend or backend", "aliases": ["application"]},
+    {"name": "🚀 ci-cd", "color": "db2777", "description": "🚀 Containers, GitHub Actions, publishing, deploys", "aliases": ["ci-cd"]},
+    {"name": "🏠 hosting", "color": "ec4899", "description": "🏠 Droplet, DNS, Traefik, and the public HTTPS route", "aliases": []},
+    {"name": "📝 documentation", "color": "fbcfe8", "description": "📝 Specs, docs, and written evidence", "aliases": ["documentation"]},
+    {"name": "✨ enhancement", "color": "f472b6", "description": "✨ New feature or improvement", "aliases": ["enhancement"]},
+    {"name": "🧪 testing", "color": "2dd4bf", "description": "🧪 Unit, integration, or browser tests", "aliases": ["testing"]},
+    {"name": "🔒 security", "color": "5eead4", "description": "🔒 Hardening, scanning, secrets, and access", "aliases": []},
+    {"name": "📦 dependencies", "color": "ccfbf1", "description": "📦 Dependency and pinned-version updates", "aliases": ["dependencies"]},
+    {"name": "♿ accessibility", "color": "0d9488", "description": "♿ Barrier for people with disabilities", "aliases": ["accessibility"]},
+    {"name": "🌱 good first issue", "color": "99f6e4", "description": "🌱 Small and friendly to start with", "aliases": ["good first issue"]},
+    {"name": "🙋 help wanted", "color": "14b8a6", "description": "🙋 Extra eyes needed", "aliases": ["help wanted"]},
+    {"name": "🐛 bug", "color": "e11d48", "description": "🐛 Something isn't working", "aliases": ["bug"]},
+    {"name": "⛔ blocked", "color": "9d174d", "description": "⛔ Waiting on a decision or another issue", "aliases": ["blocked"]},
+    {"name": "💭 question", "color": "fff1f7", "description": "💭 Needs more information", "aliases": ["question"]},
+    {"name": "👯 duplicate", "color": "ffffff", "description": "👯 Already tracked somewhere else", "aliases": ["duplicate"]},
+    {"name": "🙅 invalid", "color": "ffffff", "description": "🙅 Not a real problem", "aliases": ["invalid"]},
+    {"name": "🌙 wontfix", "color": "ffffff", "description": "🌙 Decided not to do this", "aliases": ["wontfix"]}
+  ]
+}

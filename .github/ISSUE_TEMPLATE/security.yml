@@ -1,0 +1,45 @@
+name: Security hardening
+description: Plan a non-sensitive hardening change. Do NOT use this to report a vulnerability.
+title: "[Security] "
+labels: ["🔒 security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Found a vulnerability?** Stop here and follow [SECURITY.md](../blob/main/SECURITY.md) instead. Issues are visible to everyone with access to this repository.
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk or gap
+      description: What could go wrong today, and who or what could cause it? Keep it general enough to be safe to share.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed control
+      description: The specific change, where it lives (app, image, CI, host), and any tradeoff it introduces.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable outcomes that prove the control works.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Tests, scans, or host checks. Never paste secrets, tokens, or full scanner output with credentials.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safe
+    attributes:
+      label: Safe to share
+      options:
+        - label: This issue contains no secrets and no exploitable details of an unfixed vulnerability.
+          required: true

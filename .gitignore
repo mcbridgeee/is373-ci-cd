@@ -15,7 +15,12 @@ test-results/
 
 # OS
 .DS_Store
+
+# Release identity written by the Docker build
 app/release.json
 
 # Per-host Compose overlay (e.g. Traefik route on the droplet)
 compose.override.yaml
+
+# Repo-local tools (scanner binary)
+.tools/
