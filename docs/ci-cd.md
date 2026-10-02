@@ -27,7 +27,7 @@ Every stage is a gate: failure before publication leaves the existing `:prod` ta
 
 Record the published digest in the workflow summary. On rerun, reuse/verify the original artifact rather than silently rebuilding and overwriting its commit tag.
 
-Serialize release workflows with one production concurrency group; do not cancel an in-progress publication. Before promotion, verify the run still represents the current `main` head, so a stale rerun can't move `:prod` backward. PR runs can cancel superseded runs of themselves.
+Serialize release workflows with one production concurrency group; do not cancel an in-progress publication. Before promotion, verify the run still represents the current `main` head, so a stale rerun can't move `:prod` backward. A run that finds a newer `main` head stops without moving `:prod` and ends **neutral, not failed**, noting "superseded" in its summary; the newer commit's run publishes instead. (Two quick merges used to leave a red run on `main` for this correct refusal.) PR runs can cancel superseded runs of themselves.
 
 Use the `DOCKER_PAT` Actions secret (a Docker Hub access token) to log in as `mcbridgeee`, through `docker login --password-stdin` in the publish job only, then log out. Least-privilege permissions (`contents: read` unless a step needs more), pin third-party actions to a commit SHA, keep dependency versions reproducible (locked via `pyproject.toml`/lockfile).
 

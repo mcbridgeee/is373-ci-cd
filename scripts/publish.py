@@ -19,6 +19,10 @@ def output(args):
     return subprocess.check_output(args, text=True).strip()
 
 
+class Superseded(Exception):
+    """A newer commit is on main; its own run publishes instead. Not a failure."""
+
+
 def validate_release(event, ref, commit, main_head):
     """Only the current head of main, from a push, may be published."""
     if event != "push" or ref != "refs/heads/main":
@@ -26,7 +30,7 @@ def validate_release(event, ref, commit, main_head):
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         raise ValueError("A full commit SHA is required")
     if commit != main_head:
-        raise ValueError("Refusing to promote a stale main commit")
+        raise Superseded(f"main is now {main_head}; not promoting older {commit}")
 
 
 def validate_artifact(tested, image, commit):
@@ -52,7 +56,21 @@ def tag_exists(tag):
         raise  # A network or auth failure is not evidence that the tag is absent.
 
 
+def summarize(text):
+    print(text)
+    with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+        summary.write(text + "\n")
+
+
 def main():
+    try:
+        publish()
+    except Superseded as reason:
+        # Safe: prod is untouched (a sha- tag may exist, unused). Neutral, not red.
+        summarize(f"## Not promoted: superseded\n\n{reason}. The newer commit's run publishes instead.")
+
+
+def publish():
     commit = os.environ["GITHUB_SHA"]
     folder = Path(os.getenv("RELEASE_DIR", "release-artifact"))
     tested = json.loads((folder / "tested-image.json").read_text())
@@ -81,13 +99,11 @@ def main():
     subprocess.run(["docker", "tag", tested["image_id"], channel], check=True)
     subprocess.run(["docker", "push", channel], check=True)
 
-    with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
-        summary.write(
-            "## Published release\n\n"
-            f"- Commit: `{commit}`\n- Version: `{version}`\n- Channel: `{channel}`\n- Digest: `{digest}`\n\n"
-            "This image passed E2E before publication. Check the running `/health` commit separately.\n"
-        )
-    print(json.dumps({"commit": commit, "version": version, "digest": digest}, indent=2))
+    summarize(
+        "## Published release\n\n"
+        f"- Commit: `{commit}`\n- Version: `{version}`\n- Channel: `{channel}`\n- Digest: `{digest}`\n\n"
+        "This image passed E2E before publication. Check the running `/health` commit separately."
+    )
 
 
 if __name__ == "__main__":
