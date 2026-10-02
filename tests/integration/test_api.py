@@ -89,3 +89,16 @@ def test_validation_errors_do_not_echo_submitted_input():
     response = client.post("/api/quiz", json={"answers": [marker * 3], "client_result": 7})
     assert response.status_code == 422
     assert "<script>" not in response.text
+
+
+@pytest.mark.parametrize("path", ["/", "/health", "/api/questions"])
+def test_every_response_carries_security_headers(path):
+    headers = client.get(path).headers
+    csp = headers["content-security-policy"]
+    assert "default-src 'none'" in csp
+    assert "frame-ancestors 'none'" in csp
+    assert "unsafe-inline" not in csp
+    assert "'sha256-" in csp
+    assert headers["x-content-type-options"] == "nosniff"
+    assert headers["referrer-policy"] == "no-referrer"
+    assert "camera=()" in headers["permissions-policy"]

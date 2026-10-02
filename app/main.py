@@ -1,4 +1,7 @@
+import base64
+import hashlib
 import os
+import re
 from pathlib import Path
 from typing import Annotated
 
@@ -13,6 +16,44 @@ BUILD_COMMIT = os.environ.get("BUILD_COMMIT", "dev")
 BUILD_TIME = os.environ.get("BUILD_TIME", "unknown")
 
 app = FastAPI(title="Toothpaste Quiz")
+
+INDEX = Path(__file__).parent / "index.html"
+
+
+def _inline_hashes(tag: str) -> str:
+    """CSP source list allowing exactly the inline <tag> blocks in index.html."""
+    blocks = re.findall(rf"<{tag}>(.*?)</{tag}>", INDEX.read_text(encoding="utf-8"), re.DOTALL)
+    return " ".join(
+        "'sha256-" + base64.b64encode(hashlib.sha256(block.encode("utf-8")).digest()).decode() + "'"
+        for block in blocks
+    )
+
+
+# QUIZ-43: same-origin only, and only the page's own inline script and style.
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "; ".join([
+        "default-src 'none'",
+        f"script-src {_inline_hashes('script')}",
+        f"style-src {_inline_hashes('style')}",
+        "connect-src 'self'",
+        "img-src 'self'",
+        "base-uri 'none'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+    ]),
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+    "X-Frame-Options": "DENY",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Cross-Origin-Opener-Policy": "same-origin",
+}
+
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers.update(SECURITY_HEADERS)
+    return response
 
 # Generous outer bounds (QUIZ-40). The exact count and choice rules stay in
 # quiz.py so their 422 messages name the failing question (QUIZ-21).
@@ -60,4 +101,4 @@ def submit_quiz(payload: QuizRequest):
 
 @app.get("/")
 def index():
-    return FileResponse(Path(__file__).parent / "index.html")
+    return FileResponse(INDEX)
