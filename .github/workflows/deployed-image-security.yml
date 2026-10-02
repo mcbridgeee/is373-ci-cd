@@ -1,0 +1,65 @@
+name: Deployed image security
+
+# Rescans the release that is actually live, because new CVEs appear after
+# publication. Same pinned scanner and policy as CI (docs/security.md).
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deployed-image-security
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    # Scheduled runs wait until the site is live: set the repository variable
+    # DEPLOYED_SCAN_ENABLED=true (Settings → Secrets and variables → Actions → Variables).
+    if: github.event_name == 'workflow_dispatch' || vars.DEPLOYED_SCAN_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Identify the live release from its health endpoint
+        id: release
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request
+          with urllib.request.urlopen("https://quiz.bmctiernan.com/health", timeout=30) as response:
+              health = json.load(response)
+          commit = health.get("commit", "")
+          # Validate before using it in an image reference.
+          assert health.get("status") == "ok" and health.get("environment") == "production", health
+          assert re.fullmatch(r"[0-9a-f]{40}", commit), "invalid release identity"
+          with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
+              stream.write(f"commit={commit}\n")
+          print(f"Live commit: {commit}")
+          PY
+
+      - name: Pull the immutable release tag (never the moving prod tag)
+        env:
+          IMAGE: mcbridgeee/is373-ci-cd:sha-${{ steps.release.outputs.commit }}
+        run: docker pull --platform linux/amd64 "$IMAGE"
+
+      - name: Install checksum-pinned image scanner
+        run: sh scripts/install-trivy.sh
+
+      - name: Scan the live release (blocks on fixable HIGH/CRITICAL)
+        env:
+          IMAGE: mcbridgeee/is373-ci-cd:sha-${{ steps.release.outputs.commit }}
+        run: python3 scripts/scan-image.py "$IMAGE" artifacts/security
+
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: deployed-security-${{ github.run_id }}
+          path: artifacts/security/
+          if-no-files-found: warn
+          retention-days: 14
