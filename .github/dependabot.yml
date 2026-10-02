@@ -34,6 +34,11 @@ updates:
     labels: ["📦 dependencies", "🔒 security"]
     commit-message:
       prefix: build
+    # Patch releases and digest refreshes (Debian security fixes) only.
+    # A Python minor upgrade is a deliberate change with its own issue.
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
 
   # Pinned WUD image in compose.yaml.
   - package-ecosystem: docker-compose
