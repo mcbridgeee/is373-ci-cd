@@ -43,7 +43,7 @@ services:
       wud.trigger.include: docker.production
 
   wud:
-    image: getwud/wud:9.0.2@sha256:257b2221f201a0231db295b662882c5873ff72dc687be94dbae2e15f5394f151
+    image: getwud/wud:9.2.0@sha256:f6edbbc166bcec1f46abfe32c959f3c9c887642a6c7f909f674d243277aa2cfa
     ports:
       - "127.0.0.1:8091:3000"
     env_file:
