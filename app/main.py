@@ -15,7 +15,15 @@ from app.quiz import QUESTIONS, QuizValidationError, score_quiz
 BUILD_COMMIT = os.environ.get("BUILD_COMMIT", "dev")
 BUILD_TIME = os.environ.get("BUILD_TIME", "unknown")
 
-app = FastAPI(title="Toothpaste Quiz")
+PRODUCTION = os.environ.get("APP_ENV") == "production"
+
+# No interactive API explorer on the public site (QUIZ-44).
+app = FastAPI(
+    title="Toothpaste Quiz",
+    docs_url=None if PRODUCTION else "/docs",
+    redoc_url=None if PRODUCTION else "/redoc",
+    openapi_url=None if PRODUCTION else "/openapi.json",
+)
 
 INDEX = Path(__file__).parent / "index.html"
 

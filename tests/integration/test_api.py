@@ -102,3 +102,23 @@ def test_every_response_carries_security_headers(path):
     assert headers["x-content-type-options"] == "nosniff"
     assert headers["referrer-policy"] == "no-referrer"
     assert "camera=()" in headers["permissions-policy"]
+
+
+def test_api_docs_are_not_served_in_production(monkeypatch):
+    import importlib
+
+    import app.main
+
+    monkeypatch.setenv("APP_ENV", "production")
+    production = TestClient(importlib.reload(app.main).app)
+    try:
+        for path in ("/docs", "/redoc", "/openapi.json"):
+            assert production.get(path).status_code == 404
+        assert production.get("/health").status_code == 200
+    finally:
+        monkeypatch.delenv("APP_ENV")
+        importlib.reload(app.main)
+
+
+def test_api_docs_are_available_in_development():
+    assert client.get("/openapi.json").status_code == 200
