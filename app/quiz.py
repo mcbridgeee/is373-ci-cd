@@ -45,7 +45,7 @@ QUESTIONS = [
     },
 ]
 
-RESULT = "Sensodyne"
+RESULT = "Colgate"
 
 
 class QuizValidationError(ValueError):
