@@ -85,7 +85,7 @@ class QuizRequest(BaseModel):
 
 
 class QuizResponse(BaseModel):
-    server_result: str
+    result: str
     agree: bool
 
 
@@ -119,7 +119,7 @@ def submit_quiz(payload: QuizRequest):
         server_result = score_quiz(payload.answers)
     except QuizValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return QuizResponse(server_result=server_result, agree=(server_result == payload.client_result))
+    return QuizResponse(result=server_result, agree=(server_result == payload.client_result))
 
 
 @app.get("/")
