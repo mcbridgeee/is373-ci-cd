@@ -30,6 +30,7 @@ Every `main` merge that passed `verify` (and wasn't superseded) published a `sha
 | `sha-82986cf…` | `sha256:c0583268afaf…` | 2026-10-02 18:05 | daily rescan (#19) |
 | `sha-995f5c5…` | `sha256:c76b7af7029f…` | 2026-10-02 18:07 | status docs |
 | `sha-0de9167…` | `sha256:96ba8a347b8c…` | 2026-10-05 16:55 | FastAPI 0.142.2 (Dependabot #36) |
+| `sha-be5c23c…` | `sha256:ef461cf784ae…` | 2026-10-05 17:06 | WUD 9.2.1 (Dependabot #35) |
 
 Rollback targets: releases from `cb6124d` onward. Earlier ones don't report `environment`, so `make verify-production` rightly refuses them.
 
