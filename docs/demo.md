@@ -2,6 +2,19 @@
 
 What to show when the instructor comes around. It follows the same order as the reference repo's [demo runbook](https://github.com/kaw393939/is373_ci_cd/blob/main/docs/demo.md): test levels, a live release, blocked changes, rollback. Each part takes a minute or two. Proof for every claim is in [evidence.md](evidence.md).
 
+## The instructor's requirements, and how to show each
+
+| # | Requirement | Where it lives | Show it |
+| --- | --- | --- | --- |
+| 1 | fail2ban blocks people after repeated failed attempts | server-of-love `security/fail2ban/` | `sudo fail2ban-client status sshd` (bots get banned all day) and `sudo fail2ban-client status traefik-quiz-ratelimit` |
+| 2 | Security updates every night at 2am | server-of-love `security/updates/`, timer drop-ins | `systemctl list-timers 'apt-daily*'` shows tonight 01:30 and 02:00; `sudo tail /var/log/unattended-upgrades/unattended-upgrades.log` after the first night |
+| 3 | No root login over SSH | server-of-love `security/ssh/10-server-of-love.conf` | `sudo sshd -T \| grep permitrootlogin` → `no`; `ssh root@<droplet-ip>` → `Permission denied (publickey)` |
+| 4 | Trivy in the GitHub Action that deploys the image | `.github/workflows/ci.yml`, `scripts/scan-image.py` (#16) | any `verify` run → "Scan the exact tested image" step and the severity table in its summary |
+| 4 | Hardened Dockerfile | `Dockerfile` (#5) | the file (digest-pinned base, security updates, no pip, non-root UID 10001) and the E2E step's "Container hardening checks passed" |
+| 5 | Push to deploy: GitHub → Docker Hub → server updates itself | `ci.yml` publish job, WUD in `compose.yaml` (#6, #7, #18) | step 3 below: merge a PR, then watch the live site's footer commit change |
+
+Server steps: [server-of-love security/README.md](https://github.com/mcbridgeee/server-of-love/blob/main/security/README.md). App deploy on the droplet: [hosting.md](hosting.md).
+
 ## Before class (10 minutes)
 
 Pick where production runs:
