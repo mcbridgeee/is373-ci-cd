@@ -57,6 +57,8 @@ make down                 # Stop this project's services; keep WUD data
 - [CI/CD specification](docs/ci-cd.md): gates, versioning, publication, rollback.
 - [Hosting](docs/hosting.md): the droplet runbook for `https://quiz.bmctiernan.com`.
 - [Security](docs/security.md): controls by layer and the image scan policy.
+- [Demo script](docs/demo.md): what to show, in order, with likely questions.
+- [Evidence](docs/evidence.md): run links, releases, blocked PRs, and rehearsal results.
 - [Implementation plan](docs/implementation-plan.md): the ordered issue backlog.
 - [Contributing](CONTRIBUTING.md), [AI instructions](AGENTS.md), and [GitHub policy](docs/github-workflow.md).
 
