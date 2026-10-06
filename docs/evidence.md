@@ -75,11 +75,13 @@ Full table in the [#7 comment](https://github.com/mcbridgeee/is373-ci-cd/issues/
 
 ## Droplet
 
-To fill in after going live ([hosting.md](hosting.md)):
+Deployed 2026-10-06 on the droplet (Ubuntu 24.04.5, x86_64) as `bridge`, following [hosting.md](hosting.md) (#18):
 
-- [ ] `curl -s https://quiz.bmctiernan.com/health`: commit and `environment`
-- [ ] `curl -s -D - -o /dev/null https://quiz.bmctiernan.com/`: HSTS and CSP headers
-- [ ] the other sites still `200`
-- [ ] a WUD update on the droplet (commit before → after)
+- [x] `sudo make deploy`: `Verified production: mcbridgeee/is373-ci-cd:prod`, commit `4847d195974aeb71e6d87822fcb1ca0f603376d6`, `environment: production`, then WUD started
+- [x] `sudo make status`: `prod` healthy on `127.0.0.1:8090`, `wud` on `127.0.0.1:8091`, `Updates: enabled`
+- [x] from outside: `https://quiz.bmctiernan.com/health` and `https://calc.bmctiernan.com/health` both `environment: production`, commit `4847d19`; `http://quiz.bmctiernan.com` → `301` to https; Content-Security-Policy present
+- [x] the other sites still `200`: `bmctiernan.com`, `www.bmctiernan.com`, `report.bmctiernan.com`
+- [ ] a WUD update on the droplet (commit before → after): the merge of this page is the first one
 - [ ] a rollback → resume cycle on the droplet
+- [ ] server hardening applied: `sudo ~/server-of-love/security/check.sh` all PASS (server-of-love #2)
 - [ ] first `Deployed image security` run against the live site

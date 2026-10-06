@@ -57,26 +57,45 @@ sudo docker network ls | grep hosting-web  # Traefik's network must exist
 sudo apt-get install -y make               # if 'make' is missing
 ```
 
-### 3. Get the quiz's deployment files
+### 3. Get the deployment files
 
-The repo is private, so the droplet needs read-only access. A **deploy key** gives the droplet read access to this one repo and nothing else:
+Log in as your own sudo user (on this droplet: `bridge`, home `/home/bridge`), not root. `373_hosting` is already in your home folder; `is373-ci-cd` and `server-of-love` go next to it.
+
+Both repos are private, so the droplet needs read-only access. A **deploy key** reads one repo and nothing else, and GitHub won't reuse a key across repos, so make one per repo:
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/quiz_deploy -N "" -C "server-of-love quiz deploy"
-cat ~/.ssh/quiz_deploy.pub
+ssh-keygen -t ed25519 -f ~/.ssh/deploy_quiz -N "" -C "droplet read is373-ci-cd"
+ssh-keygen -t ed25519 -f ~/.ssh/deploy_sol  -N "" -C "droplet read server-of-love"
+cat ~/.ssh/deploy_quiz.pub ~/.ssh/deploy_sol.pub
 ```
 
-On GitHub: **is373-ci-cd → Settings → Deploy keys → Add deploy key**. Paste it and leave **Allow write access unchecked**. Then:
+On GitHub, add each one under **that repo → Settings → Deploy keys → Add deploy key**, with **Allow write access unchecked**.
+
+Then give each key a name in `~/.ssh/config` (create the file if it doesn't exist), so git picks the right key:
+
+```
+Host github-quiz
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/deploy_quiz
+  IdentitiesOnly yes
+
+Host github-sol
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/deploy_sol
+  IdentitiesOnly yes
+```
 
 ```bash
+chmod 600 ~/.ssh/config
 cd ~
-GIT_SSH_COMMAND="ssh -i ~/.ssh/quiz_deploy -o IdentitiesOnly=yes" \
-  git clone git@github.com:mcbridgeee/is373-ci-cd.git
-cd ~/is373-ci-cd
-git config core.sshCommand "ssh -i ~/.ssh/quiz_deploy -o IdentitiesOnly=yes"
+git clone git@github-quiz:mcbridgeee/is373-ci-cd.git      # first time: answer "yes" to GitHub's fingerprint
+git clone git@github-sol:mcbridgeee/server-of-love.git
+ls ~                                                       # 373_hosting  is373-ci-cd  server-of-love
 ```
 
-Production pulls the tested image from Docker Hub. Nothing is built on the server.
+`git pull` in either folder keeps using its own key. Production pulls the tested image from Docker Hub; nothing is built on the server.
 
 ### 4. Install the routing adapter
 
