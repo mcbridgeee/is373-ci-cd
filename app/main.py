@@ -37,11 +37,17 @@ app = FastAPI(
 )
 
 INDEX = Path(__file__).parent / "index.html"
+CALCULATOR = Path(__file__).parent / "calculator.html"
+PAGES = (INDEX, CALCULATOR)
 
 
 def _inline_hashes(tag: str) -> str:
-    """CSP source list allowing exactly the inline <tag> blocks in index.html."""
-    blocks = re.findall(rf"<{tag}>(.*?)</{tag}>", INDEX.read_text(encoding="utf-8"), re.DOTALL)
+    """CSP source list allowing exactly the inline <tag> blocks in the app's pages."""
+    blocks = [
+        block
+        for page in PAGES
+        for block in re.findall(rf"<{tag}>(.*?)</{tag}>", page.read_text(encoding="utf-8"), re.DOTALL)
+    ]
     return " ".join(
         "'sha256-" + base64.b64encode(hashlib.sha256(block.encode("utf-8")).digest()).decode() + "'"
         for block in blocks
@@ -149,3 +155,9 @@ def calculate_route(payload: CalculationRequest):
 @app.get("/")
 def index():
     return FileResponse(INDEX)
+
+
+@app.get("/calc")
+def calculator_page():
+    # On calc.bmctiernan.com, Traefik maps "/" here (CALC-01).
+    return FileResponse(CALCULATOR)

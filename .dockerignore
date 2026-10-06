@@ -6,3 +6,4 @@
 !app/
 !app/*.py
 !app/index.html
+!app/calculator.html

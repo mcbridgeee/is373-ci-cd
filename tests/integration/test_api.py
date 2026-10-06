@@ -153,3 +153,12 @@ def test_calculate_rejects_bad_input_with_422(payload):
     assert response.status_code == 422
     # Errors name the field and the problem but never echo the submitted value.
     assert all("input" not in item for item in response.json()["detail"])
+
+
+def test_calculator_page_is_served_under_the_same_security_headers():
+    response = client.get("/calc")
+    assert response.status_code == 200
+    assert "<h1>Calculator</h1>" in response.text
+    csp = response.headers["content-security-policy"]
+    assert "unsafe-inline" not in csp
+    assert csp.count("'sha256-") == 4  # one script and one style per page, quiz and calculator
