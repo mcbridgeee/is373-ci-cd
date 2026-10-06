@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calculator</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    max-width: 640px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.5rem; }
+  form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  input, select {
+    font-size: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #8888;
+    border-radius: 6px;
+    min-width: 0;
+  }
+  input { width: 9rem; }
+  button {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+  }
+  #result { margin-top: 1.5rem; padding: 1rem; border-radius: 8px; }
+  #result.agree { background: #dcfce7; }
+  #result.disagree, #result.error { background: #fee2e2; }
+  #result.hidden { display: none; }
+  #result p { margin: 0.25rem 0; }
+  .label { color: #6b7280; }
+  .warning { color: #b91c1c; font-weight: 600; }
+  footer { margin-top: 2rem; font-size: 0.8rem; color: #6b7280; }
+</style>
+</head>
+<body>
+  <h1>Calculator</h1>
+  <p>Your browser works out the answer first, then the server checks its work.</p>
+
+  <form id="calc-form">
+    <label for="a" class="label">First number</label>
+    <input id="a" type="number" step="any" required value="6" />
+    <label for="operation" class="label">Operation</label>
+    <select id="operation">
+      <option value="add">+</option>
+      <option value="subtract">−</option>
+      <option value="multiply" selected>×</option>
+      <option value="divide">÷</option>
+    </select>
+    <label for="b" class="label">Second number</label>
+    <input id="b" type="number" step="any" required value="7" />
+    <button type="submit" id="calculate-btn">Calculate</button>
+  </form>
+
+  <div id="result" class="hidden" role="status">
+    <p><span class="label">Browser:</span> <strong id="browser-result"></strong></p>
+    <p><span class="label">Server:</span> <strong id="api-result"></strong></p>
+    <p id="status"></p>
+  </div>
+
+  <footer id="release-footer"></footer>
+
+<script>
+  const LIMIT = 1000000;
+  const OPERATIONS = {
+    add: (a, b) => a + b,
+    subtract: (a, b) => a - b,
+    multiply: (a, b) => a * b,
+    divide: (a, b) => a / b,
+  };
+
+  // The browser's own answer (CALC-10). Returns { value } or { error }.
+  function calculateInBrowser(a, b, operation) {
+    if (!Number.isFinite(a) || !Number.isFinite(b) || Math.abs(a) > LIMIT || Math.abs(b) > LIMIT) {
+      return { error: "Numbers must be finite and within ±1,000,000." };
+    }
+    if (operation === "divide" && b === 0) return { error: "Cannot divide by zero." };
+    return { value: OPERATIONS[operation](a, b) };
+  }
+
+  // Text only, never HTML (CALC-12).
+  function show(state, browserText, apiText, statusText) {
+    const result = document.getElementById("result");
+    result.className = state;
+    document.getElementById("browser-result").textContent = browserText;
+    document.getElementById("api-result").textContent = apiText;
+    const status = document.getElementById("status");
+    status.textContent = statusText;
+    status.className = state === "agree" ? "" : "warning";
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const a = document.getElementById("a").valueAsNumber;
+    const b = document.getElementById("b").valueAsNumber;
+    const operation = document.getElementById("operation").value;
+    const browser = calculateInBrowser(a, b, operation);
+    const browserText = "error" in browser ? browser.error : String(browser.value);
+
+    let response;
+    try {
+      response = await fetch("/api/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Only the inputs go to the server; it recalculates on its own (CALC-10).
+        body: JSON.stringify({ a, b, operation }),
+      });
+    } catch {
+      show("error", browserText, "unreachable", "Could not reach the server.");
+      return;
+    }
+    const body = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      const agree = "value" in browser && browser.value === body.result;
+      show(agree ? "agree" : "disagree", browserText, String(body.result),
+        agree ? "Results match" : "Browser and server disagree. Not trusting either blindly.");
+    } else if (response.status === 400 && body.detail && body.detail.message) {
+      const agree = "error" in browser && browser.error === body.detail.message;
+      show("error", browserText, body.detail.message, agree ? "Both refused it" : "Browser and server disagree.");
+    } else {
+      show("error", browserText, "rejected", "Enter numbers between -1,000,000 and 1,000,000.");
+    }
+  }
+
+  async function loadFooter() {
+    const response = await fetch("/health");
+    const health = await response.json();
+    document.getElementById("release-footer").textContent =
+      `commit ${health.commit} · built ${health.built_at}`;
+  }
+
+  document.getElementById("calc-form").addEventListener("submit", handleSubmit);
+  loadFooter();
+</script>
+</body>
+</html>

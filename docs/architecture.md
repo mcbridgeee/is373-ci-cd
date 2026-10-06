@@ -4,6 +4,7 @@
 
 - **`app/quiz.py`** — pure Python scoring logic. No HTTP, no I/O. Takes four answers, validates them, returns `"Sensodyne"`. This is the function pytest unit-tests directly.
 - **`app/main.py`** — FastAPI app. `GET /health` and `POST /api/quiz`, both thin wrappers around `quiz.py` plus request validation and release metadata. This is what the integration tests exercise through `TestClient`, without a real container.
+- **`app/calculator.py`**, **`app/calculator.html`**: the calculator added in issue 44, same split as the quiz: pure arithmetic, `POST /api/calculate` in `main.py`, and a single-file page at `/calc` that calculates in JavaScript and compares with the API.
 - **`app/index.html`** — the entire frontend: markup, CSS, and JavaScript in one file, same constraint as the reference repo. Renders the four questions, tallies the client-side result, calls `POST /api/quiz`, and displays the server's answer plus the agreement check. This is what Playwright drives against the real built image.
 
 Keeping arithmetic (`quiz.py`) separate from HTTP (`main.py`) separate from the browser (`index.html`) is deliberate: it lets each layer be tested at the right altitude — pytest for logic, `TestClient` for the API contract, Playwright for what a visitor actually experiences — matching [testing.md](testing.md).

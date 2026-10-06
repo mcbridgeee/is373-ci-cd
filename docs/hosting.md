@@ -1,4 +1,4 @@
-# Hosting: quiz.bmctiernan.com on the droplet
+# Hosting: quiz.bmctiernan.com and calc.bmctiernan.com on the droplet
 
 How the published quiz image reaches `https://quiz.bmctiernan.com` (issue 18). It follows the instructor's split: [373_hosting chapter 10](https://github.com/kaw393939/373_hosting/blob/main/book/10-application-delivery.md) for the idea, and [server-of-love](https://github.com/mcbridgeee/server-of-love) for this server's routing adapter.
 
@@ -14,7 +14,8 @@ The contract between them: container port `8000`, `GET /health` reporting the re
 ```mermaid
 flowchart LR
     Browser -->|HTTPS 443| Traefik
-    Traefik -->|Host quiz.bmctiernan.com| Prod[quiz prod :8000]
+    Traefik -->|Host quiz.bmctiernan.com| Prod[quiz + calculator prod :8000]
+    Traefik -->|Host calc.bmctiernan.com, / mapped to /calc| Prod
     Traefik --> Sites[bmctiernan.com, www, report]
     Hub[Docker Hub prod tag] --> WUD
     WUD -->|recreates| Prod
@@ -43,9 +44,10 @@ At your DNS provider, add an **A record**: host `quiz`, value = the droplet's IP
 
 ```bash
 dig +short quiz.bmctiernan.com      # must print the droplet's IP
+dig +short calc.bmctiernan.com      # same IP (add a second A record: host `calc`)
 ```
 
-Don't add `quiz.bmctiernan.com` to `hosting.json` `sites`. That would create an Apache router fighting the quiz for the same name.
+Don't add `quiz.bmctiernan.com` or `calc.bmctiernan.com` to `hosting.json` `sites`. That would create an Apache router fighting the quiz for the same name.
 
 ### 2. Check the server
 
@@ -83,7 +85,7 @@ cd ~/server-of-love && git pull
 cp ~/server-of-love/integrations/quiz/compose.traefik.yaml ~/is373-ci-cd/compose.override.yaml
 cp ~/server-of-love/integrations/quiz/.env.example ~/is373-ci-cd/.env
 cd ~/is373-ci-cd
-cat .env                                   # APP_HOST=quiz.bmctiernan.com, TRAEFIK_NETWORK=hosting-web
+cat .env                                   # APP_HOST=quiz.bmctiernan.com, CALC_HOST=calc.bmctiernan.com, TRAEFIK_NETWORK=hosting-web
 sudo docker compose config --quiet && echo "config ok"
 ```
 
@@ -101,6 +103,8 @@ From your own computer, or the droplet:
 
 ```bash
 curl -sS https://quiz.bmctiernan.com/health
+curl -sS https://calc.bmctiernan.com/health                # same commit: one container serves both
+curl -sS https://calc.bmctiernan.com/ | grep -o "<h1>Calculator</h1>"
 # {"status":"ok","commit":"<40 characters>","built_at":"...","environment":"production"}
 
 curl -sS -o /dev/null -w "%{http_code} %{redirect_url}\n" http://quiz.bmctiernan.com/   # 301 https://quiz.bmctiernan.com/

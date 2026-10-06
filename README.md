@@ -1,6 +1,8 @@
-# Toothpaste quiz CI/CD demo
+# Toothpaste quiz + calculator CI/CD demo
 
 A small FastAPI toothpaste-recommendation quiz that makes the path from a local edit to a tested production release visible. One HTML page tallies an answer in JavaScript, a backend API independently recomputes it, and the page shows whether the two agree. No matter what you answer, the recommendation is always **Sensodyne** — that's the whole joke. The point of the project is the CI/CD pipeline and the dual-computation pattern around it, not the quiz.
+
+The same app also serves a **calculator** (`/calc`, and `https://calc.bmctiernan.com` once deployed) that matches the reference repo's demo: the browser calculates, the API recalculates, and the page shows **Results match**. Same image, same tests, same pipeline (#44).
 
 This repo follows the development and delivery process demonstrated in [kaw393939/is373_ci_cd](https://github.com/kaw393939/is373_ci_cd) — structure and workflow only; the application content is intentionally different.
 
