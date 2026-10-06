@@ -31,6 +31,8 @@ Every `main` merge that passed `verify` (and wasn't superseded) published a `sha
 | `sha-995f5c5…` | `sha256:c76b7af7029f…` | 2026-10-02 18:07 | status docs |
 | `sha-0de9167…` | `sha256:96ba8a347b8c…` | 2026-10-05 16:55 | FastAPI 0.142.2 (Dependabot #36) |
 | `sha-be5c23c…` | `sha256:ef461cf784ae…` | 2026-10-05 17:06 | WUD 9.2.1 (Dependabot #35) |
+| `sha-4de9076…` | `sha256:4970591ca5de…` | 2026-10-06 18:00 | droplet evidence docs (#46); first droplet auto-update |
+| `sha-c3311d5…` | `sha256:c9a4c75aeb22…` | 2026-10-06 18:36 | green calculator (#47) |
 
 Rollback targets: releases from `cb6124d` onward. Earlier ones don't report `environment`, so `make verify-production` rightly refuses them.
 
@@ -81,7 +83,9 @@ Deployed 2026-10-06 on the droplet (Ubuntu 24.04.5, x86_64) as `bridge`, followi
 - [x] `sudo make status`: `prod` healthy on `127.0.0.1:8090`, `wud` on `127.0.0.1:8091`, `Updates: enabled`
 - [x] from outside: `https://quiz.bmctiernan.com/health` and `https://calc.bmctiernan.com/health` both `environment: production`, commit `4847d19`; `http://quiz.bmctiernan.com` → `301` to https; Content-Security-Policy present
 - [x] the other sites still `200`: `bmctiernan.com`, `www.bmctiernan.com`, `report.bmctiernan.com`
-- [ ] a WUD update on the droplet (commit before → after): the merge of this page is the first one
+- [x] a WUD update on the droplet, twice, with no manual step:
+  - `4847d19` → `4de9076`: merge of PR #46, [run 37507643538](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37507643538) published 18:00 UTC; public `/health` on both hosts showed `4de9076…`, `environment: production`, at the first check afterwards (exact switch time not recorded)
+  - `4de9076` → `c3311d5`: merge of PR #48, [run 37512344418](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37512344418) published `sha256:c9a4c75aeb227ff5a1bcb2709e50a4185ad1574eecf188c99c0ca5ba8ca86261` (= `prod`) at 18:36 UTC; public `/health` showed `c3311d504f3f190bd08ba3f7d35f2b7e0168bf49` about 210 s later
 - [ ] a rollback → resume cycle on the droplet
-- [ ] server hardening applied: `sudo ~/server-of-love/security/check.sh` all PASS (server-of-love #2)
-- [ ] first `Deployed image security` run against the live site
+- [x] server hardening applied 2026-10-06: `sudo ~/server-of-love/security/check.sh` → `all required checks passed` ([output on server-of-love #2](https://github.com/mcbridgeee/server-of-love/issues/2#issuecomment-6023245955)); from outside, root and password SSH logins refused, dashboard `401`, ports 8090/8091 closed
+- [x] first `Deployed image security` run against the live site: [run 37515867270](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37515867270) ✅, scanned live commit `c3311d5…`; `DEPLOYED_SCAN_ENABLED=true` set the same day, so it now runs daily
