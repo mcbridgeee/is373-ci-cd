@@ -11,7 +11,7 @@ What to show when the instructor comes around. It follows the same order as the 
 | 3 | No root login over SSH | server-of-love `security/ssh/10-server-of-love.conf` | `sudo sshd -T \| grep permitrootlogin` → `no`; `ssh root@<droplet-ip>` → `Permission denied (publickey)` |
 | 4 | Trivy in the GitHub Action that deploys the image | `.github/workflows/ci.yml`, `scripts/scan-image.py` (#16) | any `verify` run → "Scan the exact tested image" step and the severity table in its summary |
 | 4 | Hardened Dockerfile | `Dockerfile` (#5) | the file (digest-pinned base, security updates, no pip, non-root UID 10001) and the E2E step's "Container hardening checks passed" |
-| 5 | Push to deploy: GitHub → Docker Hub → server updates itself | `ci.yml` publish job, WUD in `compose.yaml` (#6, #7, #18) | step 3 below: merge a PR, then watch the live site's footer commit change |
+| 5 | Push to deploy: GitHub → Docker Hub → server updates itself | `ci.yml` publish job, WUD in `compose.yaml` (#6, #7, #18) | step 3 below: merge a PR, then watch the live site's footer commit change (quiz and calculator update together) |
 
 Fastest proof of the server items: `sudo ~/server-of-love/security/check.sh` on the droplet prints PASS/FAIL for fail2ban, 2am updates, root and password SSH login, firewall and open ports, the dashboard login, and the live quiz. It changes nothing and prints no secrets.
 
@@ -42,6 +42,12 @@ Then:
 ## 2. Three test levels (1 minute)
 
 Take the quiz in the browser: pick answers, submit, and see **Sensodyne** plus the agreement box. Point at the footer: it shows the exact commit that's running.
+
+Then the calculator (`https://calc.bmctiernan.com`, or `/calc` locally), the same demo as the reference repo:
+
+- **6 × 7:** browser 42, server 42, **Results match**
+- **1 ÷ 0:** both say "Cannot divide by zero." → **Both refused it**
+- **0.1 + 0.2:** both show `0.30000000000000004`, an honest floating-point answer that still matches
 
 ```sh
 make test-unit          # quiz.py rules, plain Python
