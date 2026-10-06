@@ -43,6 +43,19 @@ Added in issue 17, before the quiz is served publicly.
 
 HSTS is set by the TLS terminator (Traefik on the droplet), not the app, because only it knows the connection is HTTPS.
 
+## Calculator (CALC-xx)
+
+Added in issue 44 so the app also matches the reference repo's calculator demo. The quiz and its QUIZ IDs are unchanged; both pages share one app, image, and pipeline.
+
+- **CALC-01**: `GET /calc` serves a single-file calculator page with two number inputs, an operation (add, subtract, multiply, divide), and a Calculate button. On `calc.bmctiernan.com`, Traefik maps `/` to `/calc`.
+- **CALC-10**: The page calculates the answer in JavaScript first, then sends only `a`, `b`, and `operation` to `POST /api/calculate`.
+- **CALC-11**: The page shows the browser result, the API result, and "Results match", or a visible warning if they differ.
+- **CALC-12**: Results and errors render as text, never HTML (as QUIZ-42).
+- **CALC-20**: `POST /api/calculate` accepts only JSON numbers (no strings, no booleans) within ±1,000,000, one of the four operations, and no extra fields. Anything else is `422`, without echoing the input (as QUIZ-41).
+- **CALC-21**: Division by zero is `400` with `{"detail": {"code": "division_by_zero", "message": "Cannot divide by zero."}}`, and the page shows the message.
+- **CALC-22**: A successful request returns `{"result": <number>}`. Floating point is reported honestly (`0.1 + 0.2` → `0.30000000000000004`).
+- **CALC-30**: The calculator page falls under the same CSP and security headers as the quiz (QUIZ-43): its inline script and style are allowed by hash, with no `unsafe-inline`.
+
 ## HTTP contract
 
 ### `GET /health`
@@ -50,6 +63,10 @@ HSTS is set by the TLS terminator (Traefik on the droplet), not the app, because
 ```json
 { "status": "ok", "commit": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "built_at": "2026-09-22T16:00:00Z", "environment": "production" }
 ```
+
+### `POST /api/calculate`
+
+Request: `{ "a": 6, "b": 7, "operation": "multiply" }`, response `200`: `{ "result": 42.0 }`
 
 ### `POST /api/quiz`
 

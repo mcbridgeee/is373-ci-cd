@@ -11,6 +11,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
+from app.calculator import LIMIT, CalculationError, Operation, calculate
 from app.quiz import QUESTIONS, QuizValidationError, score_quiz
 
 RELEASE_FILE = Path(__file__).with_name("release.json")
@@ -120,6 +121,29 @@ def submit_quiz(payload: QuizRequest):
     except QuizValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return QuizResponse(server_result=server_result, agree=(server_result == payload.client_result))
+
+
+# CALC-20: strict JSON numbers only (no "6" strings, no booleans), bounded.
+Operand = Annotated[float, Field(strict=True, ge=-LIMIT, le=LIMIT, allow_inf_nan=False)]
+
+
+class CalculationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    a: Operand
+    b: Operand
+    operation: Operation
+
+
+class CalculationResponse(BaseModel):
+    result: float
+
+
+@app.post("/api/calculate", response_model=CalculationResponse)
+def calculate_route(payload: CalculationRequest):
+    try:
+        return CalculationResponse(result=calculate(payload.a, payload.b, payload.operation))
+    except CalculationError as error:
+        raise HTTPException(status_code=400, detail={"code": error.code, "message": str(error)}) from error
 
 
 @app.get("/")

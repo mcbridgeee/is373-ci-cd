@@ -123,3 +123,33 @@ def test_api_docs_are_not_served_in_production(monkeypatch):
 
 def test_api_docs_are_available_in_development():
     assert client.get("/openapi.json").status_code == 200
+
+
+def test_calculate_returns_the_server_result():
+    response = client.post("/api/calculate", json={"a": 6, "b": 7, "operation": "multiply"})
+    assert response.status_code == 200
+    assert response.json() == {"result": 42.0}
+
+
+def test_calculate_division_by_zero_is_a_400_with_a_code():
+    response = client.post("/api/calculate", json={"a": 1, "b": 0, "operation": "divide"})
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "division_by_zero"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"a": "6", "b": 7, "operation": "add"},
+        {"a": True, "b": 7, "operation": "add"},
+        {"a": 6, "b": 7, "operation": "power"},
+        {"a": 6, "b": 7, "operation": "add", "extra": 1},
+        {"a": 1_000_001, "b": 7, "operation": "add"},
+        {"a": 6, "operation": "add"},
+    ],
+)
+def test_calculate_rejects_bad_input_with_422(payload):
+    response = client.post("/api/calculate", json=payload)
+    assert response.status_code == 422
+    # Errors name the field and the problem but never echo the submitted value.
+    assert all("input" not in item for item in response.json()["detail"])
