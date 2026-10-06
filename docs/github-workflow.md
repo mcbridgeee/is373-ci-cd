@@ -40,7 +40,7 @@ Activate once the `verify` check has passed at least once on a PR (issue 6), so 
 - **Require a pull request before merging**, with **0** required approvals (solo maintainer, same as the reference repo). Allowed merge method: **Merge** only, so atomic commits survive.
 - **Require status checks to pass**: add `verify` and turn on **Require branches to be up to date before merging**.
 
-After saving, record the date here and link the first PR it applied to.
+Active since 2026-10-06 (ruleset `main`, created through the GitHub API with exactly the settings above). First PR it applied to: the one that added this line (issue 8).
 
 ## Repository settings checklist
 
