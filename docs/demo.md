@@ -13,6 +13,8 @@ What to show when the instructor comes around. It follows the same order as the 
 | 4 | Hardened Dockerfile | `Dockerfile` (#5) | the file (digest-pinned base, security updates, no pip, non-root UID 10001) and the E2E step's "Container hardening checks passed" |
 | 5 | Push to deploy: GitHub → Docker Hub → server updates itself | `ci.yml` publish job, WUD in `compose.yaml` (#6, #7, #18) | step 3 below: merge a PR, then watch the live site's footer commit change |
 
+Fastest proof of the server items: `sudo ~/server-of-love/security/check.sh` on the droplet prints PASS/FAIL for fail2ban, 2am updates, root and password SSH login, firewall and open ports, the dashboard login, and the live quiz. It changes nothing and prints no secrets.
+
 Server steps: [server-of-love security/README.md](https://github.com/mcbridgeee/server-of-love/blob/main/security/README.md). App deploy on the droplet: [hosting.md](hosting.md).
 
 ## Before class (10 minutes)
