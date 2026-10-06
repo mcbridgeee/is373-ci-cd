@@ -48,6 +48,7 @@ HSTS is set by the TLS terminator (Traefik on the droplet), not the app, because
 Added in issue 44 so the app also matches the reference repo's calculator demo. The quiz and its QUIZ IDs are unchanged; both pages share one app, image, and pipeline.
 
 - **CALC-01**: `GET /calc` serves a single-file calculator page with two number inputs, an operation (add, subtract, multiply, divide), and a Calculate button. On `calc.bmctiernan.com`, Traefik maps `/` to `/calc`.
+- **CALC-02**: The page looks like the bmctiernan.com sites (server-of-love `sites/`): rounded card on a soft gradient, floating symbols, pill badge and buttons, in a green theme. It links back to `bmctiernan.com` and the quiz. Still one file, no external fonts or CDNs.
 - **CALC-10**: The page calculates the answer in JavaScript first, then sends only `a`, `b`, and `operation` to `POST /api/calculate`.
 - **CALC-11**: The page shows the browser result, the API result, and "Results match", or a visible warning if they differ.
 - **CALC-12**: Results and errors render as text, never HTML (as QUIZ-42).

@@ -3,71 +3,131 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Calculator</title>
+<title>calc.bmctiernan.com | calculator</title>
 <style>
-  :root { color-scheme: light dark; }
+  /* Same look as the bmctiernan.com pages (server-of-love sites/), in green (CALC-02). */
+  :root {
+    --bg1: #dcf7e6; --bg2: #f4fff0; --ink: #1f3b2c; --soft: #557a63;
+    --accent: #22a861; --accent-soft: #c8f0d7; --card: #fbfffc; --line: #b9e6c9;
+  }
+  * { box-sizing: border-box; }
   body {
-    font-family: system-ui, -apple-system, sans-serif;
-    max-width: 640px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    line-height: 1.5;
+    margin: 0; min-height: 100vh; color: var(--ink);
+    font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    display: grid; place-items: center; padding: 32px 16px; overflow-x: hidden;
   }
-  h1 { font-size: 1.5rem; }
-  form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .sym { position: fixed; bottom: -40px; font-size: 22px; font-weight: 700; color: var(--accent); opacity: .45; animation: float 14s linear infinite; }
+  .sym:nth-child(1) { left: 8%;  animation-delay: 0s; }
+  .sym:nth-child(2) { left: 28%; animation-delay: 4s; font-size: 16px; }
+  .sym:nth-child(3) { left: 55%; animation-delay: 8s; }
+  .sym:nth-child(4) { left: 78%; animation-delay: 2s; font-size: 18px; }
+  .sym:nth-child(5) { left: 92%; animation-delay: 10s; font-size: 14px; }
+  @keyframes float { to { transform: translateY(-115vh) rotate(20deg); } }
+  @media (prefers-reduced-motion: reduce) { .sym { display: none; } }
+  main {
+    position: relative; width: 100%; max-width: 640px; background: var(--card);
+    border: 2px solid var(--line); border-radius: 28px; padding: 36px 32px;
+    box-shadow: 0 12px 0 var(--accent-soft);
+  }
+  @media (max-width: 520px) { main { padding: 28px 18px; } }
+  .badge {
+    display: inline-block; background: var(--accent-soft); color: var(--ink);
+    border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 700; letter-spacing: .02em;
+  }
+  h1 { font-size: clamp(30px, 6vw, 42px); margin: 16px 0 6px; line-height: 1.1; }
+  .host { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--soft); margin: 0 0 24px; }
+  p { line-height: 1.6; margin: 0 0 12px; }
+  form { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: end; margin-top: 20px; }
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .field label { font-size: 13px; font-weight: 700; color: var(--soft); }
   input, select {
-    font-size: 1rem;
-    padding: 0.5rem;
-    border: 1px solid #8888;
-    border-radius: 6px;
-    min-width: 0;
+    font: inherit; font-size: 18px; font-weight: 700; color: var(--ink); background: #fff;
+    border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; width: 100%; min-width: 0;
   }
-  input { width: 9rem; }
+  input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   button {
-    font-size: 1rem;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    cursor: pointer;
+    grid-column: 1 / -1; justify-self: start;
+    font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer;
+    background: var(--accent-soft); border: 2px solid var(--accent); border-radius: 999px;
+    padding: 10px 22px; box-shadow: 0 4px 0 var(--accent); transition: transform .15s, box-shadow .15s;
   }
-  #result { margin-top: 1.5rem; padding: 1rem; border-radius: 8px; }
-  #result.agree { background: #dcfce7; }
-  #result.disagree, #result.error { background: #fee2e2; }
+  button:hover { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent); }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  @media (max-width: 520px) { form { grid-template-columns: 1fr; } }
+  #result { margin-top: 24px; padding: 14px 18px; border-radius: 18px; border: 2px solid var(--line); background: #fff; }
+  #result.agree { background: var(--accent-soft); border-color: var(--accent); }
+  #result.disagree, #result.error { background: #ffe4ea; border-color: #f07a93; }
   #result.hidden { display: none; }
-  #result p { margin: 0.25rem 0; }
-  .label { color: #6b7280; }
-  .warning { color: #b91c1c; font-weight: 600; }
-  footer { margin-top: 2rem; font-size: 0.8rem; color: #6b7280; }
+  #result p { margin: 4px 0; }
+  .label { color: var(--soft); }
+  .warning { color: #b91c1c; font-weight: 700; }
+  .switch {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; margin-right: 8px;
+    border-radius: 999px; padding: 10px 18px; font-weight: 700; font-size: 15px; text-decoration: none;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .switch:hover { transform: translateY(2px); }
+  .switch.pink { background: #ffd1e3; color: #4a2c3d; border: 2px solid #ff6fa5; box-shadow: 0 4px 0 #ff6fa5; }
+  .switch.pink:hover { box-shadow: 0 2px 0 #ff6fa5; }
+  .switch.lav { background: #ddd3ff; color: #33304f; border: 2px solid #8b6cff; box-shadow: 0 4px 0 #8b6cff; }
+  .switch.lav:hover { box-shadow: 0 2px 0 #8b6cff; }
+  .switch:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  footer {
+    margin-top: 28px; padding-top: 16px; border-top: 2px dashed var(--line);
+    font-size: 14px; color: var(--soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  #release-footer { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
-  <h1>Calculator</h1>
-  <p>Your browser works out the answer first, then the server checks its work.</p>
+  <div class="sym" aria-hidden="true">+</div>
+  <div class="sym" aria-hidden="true">&minus;</div>
+  <div class="sym" aria-hidden="true">&times;</div>
+  <div class="sym" aria-hidden="true">&divide;</div>
+  <div class="sym" aria-hidden="true">=</div>
 
-  <form id="calc-form">
-    <label for="a" class="label">First number</label>
-    <input id="a" type="number" step="any" required value="6" />
-    <label for="operation" class="label">Operation</label>
-    <select id="operation">
-      <option value="add">+</option>
-      <option value="subtract">−</option>
-      <option value="multiply" selected>×</option>
-      <option value="divide">÷</option>
-    </select>
-    <label for="b" class="label">Second number</label>
-    <input id="b" type="number" step="any" required value="7" />
-    <button type="submit" id="calculate-btn">Calculate</button>
-  </form>
+  <main>
+    <span class="badge">&#10010; the calculator is open</span>
+    <h1>Calculator</h1>
+    <p class="host">calc.bmctiernan.com</p>
+    <p>your browser works out the answer first, then my server checks its work. if they don't agree, you'll see it.</p>
 
-  <div id="result" class="hidden" role="status">
-    <p><span class="label">Browser:</span> <strong id="browser-result"></strong></p>
-    <p><span class="label">Server:</span> <strong id="api-result"></strong></p>
-    <p id="status"></p>
-  </div>
+    <form id="calc-form">
+      <div class="field">
+        <label for="a">first number</label>
+        <input id="a" type="number" step="any" required value="6" />
+      </div>
+      <div class="field">
+        <label for="operation">operation</label>
+        <select id="operation">
+          <option value="add">+</option>
+          <option value="subtract">−</option>
+          <option value="multiply" selected>×</option>
+          <option value="divide">÷</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="b">second number</label>
+        <input id="b" type="number" step="any" required value="7" />
+      </div>
+      <button type="submit" id="calculate-btn">calculate &rarr;</button>
+    </form>
 
-  <footer id="release-footer"></footer>
+    <div id="result" class="hidden" role="status">
+      <p><span class="label">Browser:</span> <strong id="browser-result"></strong></p>
+      <p><span class="label">Server:</span> <strong id="api-result"></strong></p>
+      <p id="status"></p>
+    </div>
+
+    <a class="switch pink" href="https://bmctiernan.com">&#9825; back to the main door &rarr;</a>
+    <a class="switch lav" href="https://quiz.bmctiernan.com">&#9734; take the toothpaste quiz &rarr;</a>
+
+    <footer>
+      <span>bridge</span>
+      <span id="release-footer"></span>
+    </footer>
+  </main>
 
 <script>
   const LIMIT = 1000000;
