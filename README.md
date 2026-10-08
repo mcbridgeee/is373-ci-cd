@@ -1,4 +1,6 @@
-# Toothpaste quiz CI/CD (IS373 practical test)
+# Calculator CI/CD (IS373 practical test)
+
+The deployed website is a small calculator: the browser computes the answer, the server API recomputes it, and the page shows whether they match. The same container also serves a toothpaste quiz at `/` on `quiz.bmctiernan.com`.
 
 **Production:** https://bmctiernan.com\
 **QA:** https://qa.bmctiernan.com

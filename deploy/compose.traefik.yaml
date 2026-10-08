@@ -1,6 +1,7 @@
 # Traefik routing for the droplet (copy of server-of-love/integrations/quiz, plus QA).
-#   production  https://bmctiernan.com (also quiz. and calc.)  -> prod container (:prod tag)
-#   QA          https://qa.bmctiernan.com                      -> qa container   (:qa tag)
+#   production  https://bmctiernan.com (calculator; also quiz. and calc.) -> prod container (:prod tag)
+#   QA          https://qa.bmctiernan.com (calculator)                    -> qa container   (:qa tag)
+# On both, "/" serves the calculator page (calc-root middleware).
 #
 # On the droplet: cp deploy/compose.traefik.yaml compose.override.yaml Its Make commands load it on every operation. This file
 # only connects the quiz's prod container to the Traefik that already runs
@@ -28,7 +29,7 @@ services:
       traefik.http.routers.prodapex.rule: Host(`bmctiernan.com`)
       traefik.http.routers.prodapex.priority: "10000"
       traefik.http.routers.prodapex.entrypoints: websecure
-      traefik.http.routers.prodapex.middlewares: quiz-ratelimit,quiz-headers
+      traefik.http.routers.prodapex.middlewares: calc-root,quiz-ratelimit,quiz-headers
       traefik.http.routers.prodapex.service: quiz
       traefik.http.routers.calc.rule: Host(`${CALC_HOST:-calc.bmctiernan.com}`)
       traefik.http.routers.calc.entrypoints: websecure
@@ -57,7 +58,7 @@ services:
       traefik.docker.network: ${TRAEFIK_NETWORK:-hosting-web}
       traefik.http.routers.qa.rule: Host(`qa.bmctiernan.com`)
       traefik.http.routers.qa.entrypoints: websecure
-      traefik.http.routers.qa.middlewares: quiz-ratelimit,quiz-headers
+      traefik.http.routers.qa.middlewares: calc-root,quiz-ratelimit,quiz-headers
       traefik.http.routers.qa.service: qa
       traefik.http.services.qa.loadbalancer.server.port: "8000"
 
