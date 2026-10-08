@@ -31,6 +31,8 @@ A push to `qa` or `main` (and every pull request) starts `.github/workflows/ci.y
 | --- | --- | --- |
 | ![QA with change](docs/evidence/qa-change.png) | ![Production before](docs/evidence/prod-before.png) | ![Production with change](docs/evidence/prod-change.png) |
 
+**Automatic deployment proof:** WUD replaces the container on its own when CI moves a tag, with no command on the server. Recorded on the droplet: `4847d19` → `4de9076` after [run 37507643538](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37507643538) and `4de9076` → `c3311d5` after [run 37512344418](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37512344418), both with no manual step ([docs/evidence.md](docs/evidence.md#droplet)). For today's QA → production demo, the pages updated the same way; to save class time the new image was also pulled immediately with `docker compose pull`, which only skips WUD's 5-minute wait. The follow-up merge of [PR #53](https://github.com/mcbridgeee/is373-ci-cd/pull/53) was left entirely to WUD.
+
 **SSH security** (droplet user `bridge`, key-only):
 
 ![SSH key login as bridge](docs/evidence/ssh-login.png)
