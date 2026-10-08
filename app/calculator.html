@@ -131,6 +131,8 @@
   </main>
 
 <script>
+  // Show the hostname this page was actually served from (bmctiernan.com, qa., calc.).
+  document.querySelector(".host").textContent = location.hostname;
   const LIMIT = 1000000;
   const OPERATIONS = {
     add: (a, b) => a + b,
