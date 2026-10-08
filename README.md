@@ -21,13 +21,13 @@ A push to `qa` or `main` (and every pull request) starts `.github/workflows/ci.y
 
 | | QA | Production |
 | --- | --- | --- |
-| Workflow run | [run 37819838978](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37819838978) (push to `qa`: verify ✅ → publish ✅) | [runs on `main`](https://github.com/mcbridgeee/is373-ci-cd/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush) after merging [PR #51](https://github.com/mcbridgeee/is373-ci-cd/pull/51) (`qa` → `main`) |
-| Deployed commit / tag | `3a0eac69759af84b963eea6d7e914ae8767ba8f4` → `:qa-sha-3a0eac6…` and `:qa` | merge commit of PR #51 → `:sha-<commit>` and `:prod` (shown in the page footer) |
+| Workflow run | [run 37819838978](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37819838978) (push to `qa`: verify ✅ → publish ✅) | [run 37820800076](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37820800076) (merge of [PR #51](https://github.com/mcbridgeee/is373-ci-cd/pull/51) `qa` → `main`: verify ✅ → publish ✅) |
+| Deployed commit / tag | `3a0eac69759af84b963eea6d7e914ae8767ba8f4` → `:qa-sha-3a0eac6…` and `:qa` | `981e48d141dfc1fa8ae772caf37a3bf0a6acc39b` → `:sha-981e48d…` and `:prod` |
 | Registry | [mcbridgeee/is373-ci-cd:qa](https://hub.docker.com/r/mcbridgeee/is373-ci-cd/tags) | [mcbridgeee/is373-ci-cd:prod](https://hub.docker.com/r/mcbridgeee/is373-ci-cd/tags) |
 
 **Visible change** (the bold line "Version 2: this line went through QA before production." on the calculator): first on QA while production still showed the old page, then on production after merging `qa` into `main`.
 
-| QA after the push to `qa` | Production before the merge | Production after the merge |
+| QA after the push to `qa` (commit `3a0eac6`) | Production before the merge (commit `62446f9`, no line) | Production after the merge (commit `981e48d`) |
 | --- | --- | --- |
 | ![QA with change](docs/evidence/qa-change.png) | ![Production before](docs/evidence/prod-before.png) | ![Production with change](docs/evidence/prod-change.png) |
 
