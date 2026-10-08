@@ -24,7 +24,11 @@ def image(**overrides):
 
 
 def test_current_main_push_is_publishable():
-    publish.validate_release("push", "refs/heads/main", COMMIT, COMMIT)
+    assert publish.validate_release("push", "refs/heads/main", COMMIT, COMMIT) == ("prod", "sha-")
+
+
+def test_current_qa_push_publishes_to_qa_only():
+    assert publish.validate_release("push", "refs/heads/qa", COMMIT, COMMIT) == ("qa", "qa-sha-")
 
 
 @pytest.mark.parametrize(
