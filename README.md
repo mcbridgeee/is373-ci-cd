@@ -21,11 +21,11 @@ A push to `qa` or `main` (and every pull request) starts `.github/workflows/ci.y
 
 | | QA | Production |
 | --- | --- | --- |
-| Workflow run | QA_RUN | PROD_RUN |
-| Deployed commit / tag | QA_TAG | PROD_TAG |
+| Workflow run | [run 37819838978](https://github.com/mcbridgeee/is373-ci-cd/actions/runs/37819838978) (push to `qa`: verify ✅ → publish ✅) | [runs on `main`](https://github.com/mcbridgeee/is373-ci-cd/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush) after merging [PR #51](https://github.com/mcbridgeee/is373-ci-cd/pull/51) (`qa` → `main`) |
+| Deployed commit / tag | `3a0eac69759af84b963eea6d7e914ae8767ba8f4` → `:qa-sha-3a0eac6…` and `:qa` | merge commit of PR #51 → `:sha-<commit>` and `:prod` (shown in the page footer) |
 | Registry | [mcbridgeee/is373-ci-cd:qa](https://hub.docker.com/r/mcbridgeee/is373-ci-cd/tags) | [mcbridgeee/is373-ci-cd:prod](https://hub.docker.com/r/mcbridgeee/is373-ci-cd/tags) |
 
-**Visible change** (CHANGE_DESC): first on QA while production still showed the old page, then on production after merging `qa` into `main`.
+**Visible change** (the bold line "Version 2: this line went through QA before production." on the calculator): first on QA while production still showed the old page, then on production after merging `qa` into `main`.
 
 | QA after the push to `qa` | Production before the merge | Production after the merge |
 | --- | --- | --- |
