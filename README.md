@@ -7,6 +7,16 @@ The deployed website is a small calculator: the browser computes the answer, the
 
 Image registry: [hub.docker.com/r/mcbridgeee/is373-ci-cd](https://hub.docker.com/r/mcbridgeee/is373-ci-cd) · [Workflow runs](https://github.com/mcbridgeee/is373-ci-cd/actions/workflows/ci.yml) · [Test Evidence](#test-evidence)
 
+## Rubric checklist
+
+| Rubric row | Where the proof is |
+| --- | --- |
+| **Own server** | DigitalOcean droplet (Ubuntu 24.04, user `bridge`) runs the containers; see the live sites above and the screenshots in [Test Evidence](#test-evidence) |
+| **SSH security** | [SSH screenshots](#test-evidence): key login as non-root `bridge`, `permitrootlogin no`, `passwordauthentication no` |
+| **GitHub repository** | Source: [`app/`](app) · [`Dockerfile`](Dockerfile) · Deployment config: [`compose.yaml`](compose.yaml), [`deploy/compose.traefik.yaml`](deploy/compose.traefik.yaml) · Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) · Docker Hub token stored as the `DOCKER_PAT` Actions secret |
+| **CI/CD and image** | [How CI/CD works](#how-cicd-works) · QA and production run links, image tags and registry in [Test Evidence](#test-evidence) · visible change shown QA → production with screenshots |
+| **QA and production sites** | QA https://qa.bmctiernan.com and production https://bmctiernan.com, both HTTPS, separate containers · [Promotion rule](#promotion-rule) |
+
 ## Promotion rule
 
 - Push to the **`qa`** branch → CI tests, builds, and pushes `mcbridgeee/is373-ci-cd:qa` (plus `qa-sha-<commit>`) → the droplet's QA container updates → **https://qa.bmctiernan.com**.
