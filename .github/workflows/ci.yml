@@ -3,7 +3,7 @@ name: CI / CD
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, qa]
   workflow_dispatch:
 
 # Least privilege by default; no job here needs to write to the repository.
@@ -11,9 +11,9 @@ permissions:
   contents: read
 
 concurrency:
-  # One production group for main pushes (never cancel a publication);
+  # One publish group per branch (main, qa); never cancel a publication.
   # PRs and manual runs cancel their own superseded runs.
-  group: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || format('verify-{0}', github.ref) }}
+  group: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/qa') && format('publish-{0}', github.ref) || format('verify-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
@@ -58,14 +58,14 @@ jobs:
         run: python3 scripts/scan-image.py "$IMAGE" artifacts/security
 
       - name: Export the exact tested image (no rebuild later)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/qa')
         run: |
           mkdir -p release-artifact
           docker save -o release-artifact/image.tar "$IMAGE"
           cp .state/tested-image.json release-artifact/tested-image.json
 
       - name: Retain tested image for publication
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/qa')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-amd64
@@ -83,9 +83,9 @@ jobs:
           retention-days: 7
 
   publish:
-    # Only a passing push to main publishes. PRs never see the Docker Hub token.
+    # Only a passing push to main (-> prod) or qa (-> qa) publishes. PRs never see the Docker Hub token.
     needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/qa')
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -105,7 +105,7 @@ jobs:
           DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
         run: printf '%s' "$DOCKER_PAT" | docker login --username mcbridgeee --password-stdin
 
-      - name: Publish the tested image, then move prod
+      - name: Publish the tested image, then move its channel (qa or prod)
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/publish.py

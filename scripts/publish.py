@@ -1,4 +1,7 @@
-"""Publish the exact image that passed CI, then move the prod channel to it.
+"""Publish the exact image that passed CI, then move its channel to it.
+
+Promotion rule: a push to `qa` moves the `qa` channel (qa.bmctiernan.com);
+a push to `main` moves the `prod` channel (bmctiernan.com).
 
 Runs only in the publish job of .github/workflows/ci.yml. Nothing is rebuilt:
 the image comes from `docker load` of the artifact the verify job saved.
@@ -14,23 +17,31 @@ import urllib.request
 
 REPOSITORY = "mcbridgeee/is373-ci-cd"
 
+# Branch -> (channel tag, prefix for the immutable version tag). QA uses its own
+# prefix so promoting the same commit to main never collides with a QA tag.
+CHANNELS = {
+    "refs/heads/main": ("prod", "sha-"),
+    "refs/heads/qa": ("qa", "qa-sha-"),
+}
+
 
 def output(args):
     return subprocess.check_output(args, text=True).strip()
 
 
 class Superseded(Exception):
-    """A newer commit is on main; its own run publishes instead. Not a failure."""
+    """A newer commit is on the branch; its own run publishes instead. Not a failure."""
 
 
-def validate_release(event, ref, commit, main_head):
-    """Only the current head of main, from a push, may be published."""
-    if event != "push" or ref != "refs/heads/main":
-        raise ValueError("Publication requires a main push, never a PR or manual run")
+def validate_release(event, ref, commit, branch_head):
+    """Only the current head of main or qa, from a push, may be published."""
+    if event != "push" or ref not in CHANNELS:
+        raise ValueError("Publication requires a main or qa push, never a PR or manual run")
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         raise ValueError("A full commit SHA is required")
-    if commit != main_head:
-        raise Superseded(f"main is now {main_head}; not promoting older {commit}")
+    if commit != branch_head:
+        raise Superseded(f"{ref} is now {branch_head}; not promoting older {commit}")
+    return CHANNELS[ref]
 
 
 def validate_artifact(tested, image, commit):
@@ -78,12 +89,15 @@ def publish():
     image = json.loads(output(["docker", "image", "inspect", tested["image_id"]]))[0]
     validate_artifact(tested, image, commit)
 
-    def check_current():
-        head = output(["gh", "api", f"repos/{os.environ['GITHUB_REPOSITORY']}/git/ref/heads/main", "--jq", ".object.sha"])
-        validate_release(os.environ["GITHUB_EVENT_NAME"], os.environ["GITHUB_REF"], commit, head)
+    ref = os.environ["GITHUB_REF"]
 
-    check_current()
-    version_tag = f"sha-{commit}"
+    def check_current():
+        branch = ref.removeprefix("refs/")
+        head = output(["gh", "api", f"repos/{os.environ['GITHUB_REPOSITORY']}/git/ref/{branch}", "--jq", ".object.sha"])
+        return validate_release(os.environ["GITHUB_EVENT_NAME"], ref, commit, head)
+
+    channel_tag, prefix = check_current()
+    version_tag = f"{prefix}{commit}"
     if tag_exists(version_tag):
         raise SystemExit(f"{version_tag} already exists. Refusing to overwrite a release; push a new commit instead.")
 
@@ -93,9 +107,9 @@ def publish():
     details = json.loads(output(["docker", "image", "inspect", version]))[0]
     digest = next(d for d in details["RepoDigests"] if d.startswith(REPOSITORY + "@"))
 
-    # Re-check right before moving prod so a slow run can't move it backward.
+    # Re-check right before moving the channel so a slow run can't move it backward.
     check_current()
-    channel = f"{REPOSITORY}:prod"
+    channel = f"{REPOSITORY}:{channel_tag}"
     subprocess.run(["docker", "tag", tested["image_id"], channel], check=True)
     subprocess.run(["docker", "push", channel], check=True)
 

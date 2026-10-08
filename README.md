@@ -1,4 +1,45 @@
-# Toothpaste quiz + calculator CI/CD demo
+# Toothpaste quiz CI/CD (IS373 practical test)
+
+**Production:** https://bmctiernan.com
+**QA:** https://qa.bmctiernan.com
+
+Image registry: [hub.docker.com/r/mcbridgeee/is373-ci-cd](https://hub.docker.com/r/mcbridgeee/is373-ci-cd) · [Workflow runs](https://github.com/mcbridgeee/is373-ci-cd/actions/workflows/ci.yml) · [Test Evidence](#test-evidence)
+
+## Promotion rule
+
+- Push to the **`qa`** branch → CI tests, builds, and pushes `mcbridgeee/is373-ci-cd:qa` (plus `qa-sha-<commit>`) → the droplet's QA container updates → **https://qa.bmctiernan.com**.
+- After checking QA, open a PR from `qa` into **`main`** and merge it → CI pushes `:prod` (plus `sha-<commit>`) → the production container updates → **https://bmctiernan.com**.
+- QA and production are separate containers that follow separate tags (`:qa` and `:prod`), so nothing on QA reaches production until it is merged into `main`.
+
+## How CI/CD works
+
+A push to `qa` or `main` (and every pull request) starts `.github/workflows/ci.yml`. The `verify` job runs unit tests, API integration tests, builds the Docker image once from the `Dockerfile`, runs browser (Playwright) tests against that image, and scans it with Trivy; if any step fails the job stops and the `publish` job never runs, so nothing is deployed. On a `qa` or `main` push, `publish` loads the exact tested image (no rebuild), logs in to Docker Hub with the `DOCKER_PAT` GitHub Actions secret, and pushes an immutable commit tag plus the moving `:qa` or `:prod` tag. On the DigitalOcean droplet, WUD (What's Up Docker, [compose.yaml](compose.yaml)) checks Docker Hub every 5 minutes and automatically recreates the `qa` or `prod` container when its tag points at a new image; Traefik ([deploy/compose.traefik.yaml](deploy/compose.traefik.yaml)) serves them over HTTPS with Let's Encrypt certificates. Deployment is pull-based: GitHub never holds SSH access to the server.
+
+## Test Evidence
+
+| | QA | Production |
+| --- | --- | --- |
+| Workflow run | QA_RUN | PROD_RUN |
+| Deployed commit / tag | QA_TAG | PROD_TAG |
+| Registry | [mcbridgeee/is373-ci-cd:qa](https://hub.docker.com/r/mcbridgeee/is373-ci-cd/tags) | [mcbridgeee/is373-ci-cd:prod](https://hub.docker.com/r/mcbridgeee/is373-ci-cd/tags) |
+
+**Visible change** (CHANGE_DESC): first on QA while production still showed the old page, then on production after merging `qa` into `main`.
+
+| QA after the push to `qa` | Production before the merge | Production after the merge |
+| --- | --- | --- |
+| ![QA with change](docs/evidence/qa-change.png) | ![Production before](docs/evidence/prod-before.png) | ![Production with change](docs/evidence/prod-change.png) |
+
+**SSH security** (droplet user `bridge`, key-only):
+
+![SSH key login as bridge](docs/evidence/ssh-login.png)
+
+![Effective sshd settings](docs/evidence/sshd-settings.png)
+
+`sudo sshd -T | grep -Ei 'permitrootlogin|passwordauthentication'` reports `permitrootlogin no` and `passwordauthentication no`. Attempts to log in as `root`, or with a password, are refused (shown live in class). Full hardening checklist: [server-of-love/security](https://github.com/mcbridgeee/server-of-love/tree/main/security). More history: [docs/evidence.md](docs/evidence.md).
+
+---
+
+## About the app
 
 A small FastAPI toothpaste-recommendation quiz that makes the path from a local edit to a tested production release visible. One HTML page tallies an answer in JavaScript, a backend API independently recomputes it, and the page shows whether the two agree. No matter what you answer, the recommendation is always **Sensodyne** — that's the whole joke. The point of the project is the CI/CD pipeline and the dual-computation pattern around it, not the quiz.
 
@@ -6,7 +47,7 @@ The same app also serves a **calculator** (`/calc`, and `https://calc.bmctiernan
 
 This repo follows the development and delivery process demonstrated in [kaw393939/is373_ci_cd](https://github.com/kaw393939/is373_ci_cd) — structure and workflow only; the application content is intentionally different.
 
-**Status:** the quiz, its tests, hardened container, CI/CD pipeline (test → scan → publish), and WUD deploy/rollback tooling are done and published to Docker Hub. Going live at `https://quiz.bmctiernan.com` is the next step; see the [hosting runbook](docs/hosting.md) and the [implementation plan](docs/implementation-plan.md).
+**Status:** live on the DigitalOcean droplet: production at https://bmctiernan.com (also `quiz.` and `calc.`), QA at https://qa.bmctiernan.com. See the [hosting runbook](docs/hosting.md).
 
 ## Delivery flow (target)
 

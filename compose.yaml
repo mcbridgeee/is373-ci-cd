@@ -1,6 +1,7 @@
 # Three services on one machine, kept separate on purpose:
 #   dev   your live-editing copy, built from local source  -> http://127.0.0.1:8080
-#   prod  the published image from Docker Hub              -> http://127.0.0.1:8090
+#   prod  the published image from Docker Hub (:prod)      -> http://127.0.0.1:8090
+#   qa    the published QA image from Docker Hub (:qa)     -> http://127.0.0.1:8092
 #   wud   What's Up Docker, watches prod for new images    -> http://127.0.0.1:8091
 # Recreating prod never touches dev, and vice versa.
 name: is373-ci-cd
@@ -41,6 +42,28 @@ services:
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: "^prod$$"
+      wud.trigger.include: docker.production
+
+  qa:
+    # QA channel: CI moves :qa on every passing push to the qa branch. Same
+    # image and hardening as prod, its own container, so QA never touches prod.
+    image: ${QA_IMAGE:-mcbridgeee/is373-ci-cd:qa}
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+    environment:
+      APP_ENV: qa
+    ports:
+      - "127.0.0.1:8092:8000"
+    restart: unless-stopped
+    labels:
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.tag.include: "^qa$$"
       wud.trigger.include: docker.production
 
   wud:
