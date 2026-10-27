@@ -97,13 +97,15 @@ ls ~                                                       # 373_hosting  is373-
 
 `git pull` in either folder keeps using its own key. Production pulls the tested image from Docker Hub; nothing is built on the server.
 
-### 4. Install the routing adapter
+### 4. Install the routing file
+
+The Traefik routes live in this repo's [deploy/compose.traefik.yaml](../deploy/compose.traefik.yaml): production on `bmctiernan.com` (plus `quiz.` and `calc.`) and QA on `qa.bmctiernan.com`. Don't use server-of-love's `integrations/quiz/compose.traefik.yaml` here. It's the older adapter, without the `bmctiernan.com` and `qa` routes. The `.env` still comes from server-of-love; `APP_HOST` in it is required.
 
 ```bash
 cd ~/server-of-love && git pull
-cp ~/server-of-love/integrations/quiz/compose.traefik.yaml ~/is373-ci-cd/compose.override.yaml
-cp ~/server-of-love/integrations/quiz/.env.example ~/is373-ci-cd/.env
-cd ~/is373-ci-cd
+cd ~/is373-ci-cd && git pull
+cp deploy/compose.traefik.yaml compose.override.yaml
+cp ~/server-of-love/integrations/quiz/.env.example .env
 cat .env                                   # APP_HOST=quiz.bmctiernan.com, CALC_HOST=calc.bmctiernan.com, TRAEFIK_NETWORK=hosting-web
 sudo docker compose config --quiet && echo "config ok"
 ```
@@ -124,6 +126,7 @@ From your own computer, or the droplet:
 curl -sS https://quiz.bmctiernan.com/health
 curl -sS https://calc.bmctiernan.com/health                # same commit: one container serves both
 curl -sS https://calc.bmctiernan.com/ | grep -o "<h1>Calculator</h1>"
+curl -sS https://bmctiernan.com/ | grep -o "<h1>Calculator</h1>"       # production calculator on the main domain
 # {"status":"ok","commit":"<40 characters>","built_at":"...","environment":"production"}
 
 curl -sS -o /dev/null -w "%{http_code} %{redirect_url}\n" http://quiz.bmctiernan.com/   # 301 https://quiz.bmctiernan.com/
@@ -151,7 +154,7 @@ The commit must equal the one in the latest **CI / CD → publish** run summary 
 | Prove what's running | `sudo make verify-production` |
 | Roll back | `sudo make rollback RELEASE=sha-<full commit>` (WUD pauses) |
 | Go back to automatic updates | `sudo make resume-updates` |
-| Update the deploy files | `git pull` (release code arrives via the image, not git) |
+| Update the deploy files | `git pull` (release code arrives via the image, not git); if `deploy/compose.traefik.yaml` changed, copy it to `compose.override.yaml` again |
 
 To open WUD's dashboard, tunnel it from your computer: `ssh -L 8091:127.0.0.1:8091 <you>@<droplet-ip>`, then visit `http://localhost:8091`. The login is in `sudo cat ~/is373-ci-cd/.state/wud.env`. Never give WUD a public route: it controls Docker on the droplet.
 
