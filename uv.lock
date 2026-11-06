@@ -415,6 +415,7 @@ dev = [
     { name = "playwright" },
     { name = "pytest" },
     { name = "pytest-playwright" },
+    { name = "requests" },
 ]
 
 [package.metadata]
@@ -430,6 +431,7 @@ dev = [
     { name = "playwright", specifier = ">=1.47" },
     { name = "pytest", specifier = ">=8.3" },
     { name = "pytest-playwright", specifier = ">=0.5" },
+    { name = "requests", specifier = ">=2.32" },
 ]
 
 [[package]]
